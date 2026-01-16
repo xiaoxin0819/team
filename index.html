@@ -3,65 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手</title>
+    <title>组队助手-阵容平衡版</title>
     <style>
         :root { 
-            --p: #07c160; 
-            --bg: #f5f7fa; 
-            --card: #ffffff; 
-            --text: #333; 
-            --blue: #007aff; 
-            --red: #ff3b30; 
-            --gold: #FFD700; 
-            --orange: #ff9500; 
-            --darkred: #a52a2a; 
+            --p: #07c160; --bg: #f5f7fa; --card: #ffffff; --text: #333; 
+            --blue: #007aff; --red: #ff3b30; --gold: #FFD700; 
+            --orange: #ff9500; --darkred: #a52a2a; 
         }
-
         body { 
             font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            background: var(--bg); 
-            margin: 0; 
-            padding: 15px; 
-            color: var(--text); 
-            -webkit-font-smoothing: antialiased;
+            background: var(--bg); margin: 0; padding: 15px; color: var(--text); -webkit-font-smoothing: antialiased;
         }
-        
-        .card { 
-            background: var(--card); 
-            border-radius: 14px; 
-            padding: 18px; 
-            margin-bottom: 15px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
-        }
-
+        .card { background: var(--card); border-radius: 14px; padding: 18px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         h3 { margin: 0 0 15px 0; font-size: 16px; font-weight: 600; color: #000; display: flex; align-items: center; }
         h3::before { content: ""; width: 4px; height: 16px; background: var(--p); border-radius: 2px; margin-right: 8px; }
-        
-        /* 人名：大号、纯黑、恢复加粗 */
-        .m-name-title { 
-            font-size: 20px; 
-            font-weight: 700; 
-            color: #000 !important; 
-        }
-
-        /* 职业与战力：放大、不加粗 */
-        .job-label, .power-label { 
-            font-size: 15px; 
-            font-weight: 400 !important; 
-        }
-
+        .m-name-title { font-size: 20px; font-weight: 700; color: #000 !important; }
+        .job-label, .power-label { font-size: 15px; font-weight: 400 !important; }
         .job-骑士 { color: var(--gold) !important; }
-        .job-术士 { color: var(--blue) !important; }
+        .job-术士 { color: var(--blue) !important; font-weight: 600 !important; }
         .job-贤者 { color: var(--p) !important; }
         .job-斗士 { color: var(--darkred) !important; }
         .highlight-red { color: var(--red) !important; }
+        
+        /* 侧边双向导航 UI 优化 */
+        .side-nav {
+            position: fixed; right: 15px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 15px; z-index: 999;
+        }
+        .nav-btn {
+            width: 48px; height: 48px; background: rgba(255,255,255,0.85);
+            border: 1px solid rgba(0,0,0,0.08); border-radius: 50%; color: var(--blue);
+            cursor: pointer; display: flex; align-items: center; justify-content: center; 
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12); backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px); transition: all 0.2s;
+        }
+        .nav-btn:active { background: #fff; transform: scale(0.9); }
+        .nav-icon { width: 24px; height: 24px; stroke: currentColor; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 
+        .del-btn {
+            background: #ffeef0; color: var(--red); border: 1px solid #ffccc7;
+            padding: 5px 12px; border-radius: 6px; font-size: 14px; font-weight: 500;
+            cursor: pointer; margin-left: 15px;
+        }
+        #toast {
+            position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85); color: #fff; padding: 12px 24px;
+            border-radius: 10px; z-index: 9999; display: none; font-size: 15px;
+            text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); pointer-events: none;
+        }
+        #modalOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 10000;
+        }
+        .modal-box {
+            background: #fff; width: 85%; max-width: 400px; border-radius: 15px; padding: 20px; text-align: center;
+        }
+        .share-url-box {
+            width: 100%; padding: 10px; background: #f0f0f0; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 14px; word-break: break-all; margin: 15px 0;
+            min-height: 50px; display: block; box-sizing: border-box; color: #333;
+        }
+        
         textarea, input, select { 
             width: 100%; padding: 12px; border: 1px solid #efefef; 
             border-radius: 8px; background: #fafafa; outline: none; 
             box-sizing: border-box; font-size: 15px; margin-bottom: 10px; 
         }
-
         .btn { 
             width: 100%; border: none; border-radius: 10px; padding: 14px; 
             font-size: 16px; font-weight: 600; cursor: pointer; color: #fff; 
@@ -71,39 +78,44 @@
         .btn-blue { background: var(--blue); }
         .btn-red { background: var(--red); }
         .btn-orange { background: var(--orange); }
-        
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
-        .modal-content { background: #fff; width: 85%; padding: 25px; border-radius: 15px; }
-        
-        .tag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .tag-box { border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px 5px; text-align: center; background: #fff; }
-        .tag-box.active { border-color: var(--p); background: #f0f9f4; box-shadow: 0 0 0 2px var(--p); }
-        
-        /* 待匹配意向页人名：同步加粗 */
-        .tag-name { display: block; font-size: 18px; color: #000; font-weight: 700; margin-bottom: 2px; }
 
+        .tag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .tag-box { border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px 5px; text-align: center; background: #fff; cursor: pointer; }
+        .tag-box.active { border-color: var(--p); background: #f0f9f4; box-shadow: 0 0 0 2px var(--p); }
+        .tag-name { display: block; font-size: 18px; color: #000; font-weight: 700; margin-bottom: 2px; }
         .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
         .res-person { background: #fff; padding: 12px 4px; border-radius: 8px; border: 1px solid #eee; text-align: center; }
-        /* 结果页人名：同步加粗 */
         .res-person b { font-size: 19px; color: #000; font-weight: 700; display: block; margin-bottom: 4px; }
         .res-person span { font-size: 14px; font-weight: 400 !important; }
     </style>
 </head>
 <body>
 
-<div id="shareModal" class="modal">
-    <div class="modal-content">
-        <h3 style="justify-content:center; color:var(--blue);">分享链接</h3>
-        <div id="shareLinkArea" style="width: 100%; height: 80px; font-size: 12px; word-break: break-all; border: 1px solid #eee; padding: 8px; border-radius: 8px; background: #f9f9f9; margin-bottom: 15px; overflow-y: scroll; text-align: left;"></div>
-        <button class="btn btn-blue" onclick="copyShareLink()">点击复制链接</button>
-        <button class="btn btn-red" style="margin-top:10px" onclick="document.getElementById('shareModal').style.display='none'">关闭</button>
+<div id="toast"></div>
+
+<div class="side-nav">
+    <button class="nav-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="去顶部">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+    </button>
+    <button class="nav-btn" onclick="window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'})" title="去底部">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+</div>
+
+<div id="modalOverlay">
+    <div class="modal-box">
+        <h3 style="justify-content: center;">分享页面链接</h3>
+        <p style="font-size: 13px; color: #666; margin-bottom: 10px;">点击按钮复制链接，或长按灰色框手动复制：</p>
+        <textarea id="shareUrl" class="share-url-box" readonly></textarea>
+        <button class="btn btn-green" onclick="copyUrl()">一键复制链接</button>
+        <button class="btn btn-red" style="margin-bottom:0" onclick="closeModal()">关闭</button>
     </div>
 </div>
 
 <div class="card">
     <h3>1. 录入数据</h3>
-    <textarea id="importBox" placeholder="在此粘贴接龙文本..."></textarea>
-    <button class="btn btn-green" onclick="smartImport()">智能解析</button>
+    <textarea id="importBox" placeholder="粘贴接龙文本..."></textarea>
+    <button class="btn btn-green" onclick="smartImport()">智能解析接龙</button>
     <div style="background:#fcfcfc; border:1px dashed #ccc; padding:15px; border-radius:10px; margin-top:10px;">
         <input type="text" id="m_name" placeholder="昵称">
         <select id="m_job">
@@ -113,13 +125,13 @@
         <button class="btn btn-orange" style="margin-bottom:0" onclick="addManual()">确认加入名单</button>
     </div>
     <div style="display:flex; gap:10px; margin-top:10px;">
-        <button class="btn btn-blue" style="flex:1" onclick="openShare()">分享页面</button>
-        <button class="btn btn-red" style="flex:1" onclick="clearAll()">重置数据</button>
+        <button class="btn btn-blue" style="flex:1; margin-bottom:0" onclick="openShareModal()">分享页面</button>
+        <button class="btn btn-red" style="flex:1; margin-bottom:0" onclick="clearAll()">重置数据</button>
     </div>
 </div>
 
-<div class="card"><h3>2. 待匹配人员</h3><div id="list"></div></div>
-<button class="btn btn-blue" style="font-size: 18px; padding: 18px; font-weight:600; border-radius:12px;" onclick="match()">生成方案</button>
+<div class="card"><h3>2. 待匹配意向 (点击名字选择)</h3><div id="list"></div></div>
+<button class="btn btn-blue" style="font-size: 18px; padding: 18px; font-weight:600; border-radius:12px;" onclick="match()">生成方案 (5%阈值+阵容冲突规避)</button>
 <div id="res"></div>
 
 <script>
@@ -127,41 +139,40 @@
     const JOBS = ["术士", "贤者", "骑士", "斗士"];
     const STATUS = ["未组队", "尚未", "待组", "缺", "差", "补"];
 
-    function safeB64(str) { return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m, p) => String.fromCharCode('0x' + p))); }
+    function showMsg(text, type = 'info') {
+        const t = document.getElementById('toast');
+        t.innerText = text;
+        t.style.background = type === 'err' ? 'rgba(255,59,48,0.9)' : 'rgba(7,193,96,0.9)';
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 2000);
+    }
+
+    function openShareModal() {
+        document.getElementById('shareUrl').value = window.location.href;
+        document.getElementById('modalOverlay').style.display = 'flex';
+    }
+    function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
+    function copyUrl() {
+        const u = document.getElementById('shareUrl');
+        u.select(); u.setSelectionRange(0, 99999);
+        try {
+            document.execCommand('copy');
+            showMsg("已成功复制链接");
+        } catch (e) {
+            showMsg("复制失败，请手动长按复制", "err");
+        }
+    }
 
     window.onload = function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const d = urlParams.get('d');
-        if(d) {
-            try {
-                const dec = decodeURIComponent(Array.prototype.map.call(atob(d), (c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-                const json = JSON.parse(dec);
-                ms = json.ms || json.m || [];
-                fixedTs = json.fs || json.f || [];
-                unit = json.u || "万";
-                render(); return;
-            } catch(e) {}
-        }
         ms = JSON.parse(localStorage.getItem('tm_ms') || '[]');
         fixedTs = JSON.parse(localStorage.getItem('tm_fs') || '[]');
         unit = localStorage.getItem('tm_u') || '万';
         render();
     }
 
-    function openShare() {
-        const data = safeB64(JSON.stringify({ms, fs:fixedTs, u:unit}));
-        document.getElementById('shareLinkArea').innerText = window.location.origin + window.location.pathname + "?d=" + data;
-        document.getElementById('shareModal').style.display = 'flex';
-    }
-
-    function copyShareLink() {
-        const link = document.getElementById('shareLinkArea').innerText;
-        navigator.clipboard.writeText(link).then(() => alert("复制成功！")).catch(() => alert("请手动复制"));
-    }
-
     function smartImport() {
         const text = document.getElementById('importBox').value;
-        if(!text.trim()) return;
+        if(!text.trim()) { showMsg("请输入内容", "err"); return; }
         unit = text.includes("亿") ? "亿" : "万";
         const lines = text.split('\n');
         let tM = [], tF = [], allF = new Set();
@@ -190,17 +201,17 @@
                 }
             }
         });
-        ms = tM.filter(m => !allF.has(m.n)); fixedTs = tF;
-        save(); render();
+        ms = tM; fixedTs = tF;
+        save(); render(); showMsg("导入完成");
     }
 
     function addManual() {
-        const name = document.getElementById('m_name').value.trim();
-        const job = document.getElementById('m_job').value;
-        const power = parseFloat(document.getElementById('m_power').value);
-        if(!name || isNaN(power)) return;
+        const nI = document.getElementById('m_name'), pI = document.getElementById('m_power');
+        const name = nI.value.trim(), job = document.getElementById('m_job').value, power = parseFloat(pI.value);
+        if(!name || isNaN(power)) { showMsg("信息不全", "err"); return; }
         ms.push({ n: name, j: job, p: power, pre: [] });
-        save(); render();
+        save(); render(); showMsg(name + " 已加入");
+        nI.value = ""; pI.value = "";
     }
 
     function render() {
@@ -209,16 +220,20 @@
             <div style="margin-bottom:20px; border-bottom:1px solid #f0f0f0; padding-bottom:15px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <span class="m-name-title">${m.n}</span>
-                    <div class="job-label">
-                        <span class="job-${m.j}">${m.j}</span> | <span class="highlight-red power-label">${m.p}${unit}</span>
-                        <span style="color:#ff3b30; margin-left:12px; font-size:13px; cursor:pointer;" onclick="ms.splice(${i},1);save();render();">[移除]</span>
+                    <div style="display:flex; align-items:center;">
+                        <div class="job-label">
+                            <span class="job-${m.j}">${m.j}</span> | <span class="highlight-red power-label">${m.p}${unit}</span>
+                        </div>
+                        <button class="del-btn" onclick="ms.splice(${i},1);save();render();showMsg('已移除')">移除</button>
                     </div>
                 </div>
                 <div class="tag-grid">
                     ${ms.map((t, k) => i===k ? '' : `
                         <div class="tag-box ${m.pre.includes(t.n)?'active':''}" onclick="sel(${i},'${t.n}')">
                             <span class="tag-name">${t.n}</span>
-                            <span class="job-label"><span class="highlight-red power-label">${t.p}${unit}</span> <span class="job-${t.j}">${t.j}</span></span>
+                            <span class="job-label">
+                                <span class="job-${t.j}">${t.j}</span> | <span class="highlight-red power-label">${t.p}${unit}</span>
+                            </span>
                         </div>`).join('')}
                 </div>
             </div>`).join('');
@@ -226,8 +241,7 @@
 
     function sel(idx, name) {
         const m = ms[idx], p = m.pre.indexOf(name);
-        if(p > -1) m.pre.splice(p, 1);
-        else if(m.pre.length < 3) m.pre.push(name);
+        if(p > -1) m.pre.splice(p, 1); else if(m.pre.length < 3) m.pre.push(name);
         save(); render();
     }
 
@@ -237,13 +251,13 @@
         localStorage.setItem('tm_u', unit);
     }
 
-    function clearAll() { if(confirm("确定清空吗？")) { localStorage.clear(); location.reload(); } }
+    function clearAll() { if(confirm("重置数据？")) { localStorage.clear(); location.reload(); } }
 
     function match() {
+        if(ms.length === 0 && fixedTs.length === 0) { showMsg("名单为空", "err"); return; }
         let used = new Set(), results = [];
         let pool = [...ms].sort((a,b) => b.p - a.p);
         const getJobCount = (team, job) => team.filter(m => m.j === job).length;
-
         pool.forEach(m => {
             if (used.has(m.n)) return;
             if (m.pre.length > 0) {
@@ -255,7 +269,7 @@
                     }
                 });
                 while (team.length < 4) {
-                    let left = pool.filter(p => !used.has(p.n)).sort((a,b) => b.p - a.p);
+                    let left = pool.filter(p => !used.has(p.n));
                     if (left.length === 0) break;
                     let p = left.find(x => getJobCount(team, x.j) < 2) || left[0];
                     team.push(p); used.add(p.n);
@@ -267,35 +281,54 @@
             let left = pool.filter(p => !used.has(p.n));
             if (left.length === 0) break;
             let team = [];
-            while(team.length < 4 && pool.filter(p => !used.has(p.n)).length > 0) {
-                let nextLeft = pool.filter(p => !used.has(p.n));
-                let partner = nextLeft.find(p => getJobCount(team, p.j) < 2) || nextLeft[0];
-                team.push(partner); used.add(partner.n);
+            let leader = left[0];
+            team.push(leader);
+            used.add(leader.n);
+            while(team.length < 4) {
+                let currentLeft = pool.filter(p => !used.has(p.n));
+                if(currentLeft.length === 0) break;
+                let partner = null;
+                let searchRange = currentLeft.slice(0, 10); 
+                for(let p of searchRange) {
+                    if(getJobCount(team, p.j) >= 2) continue;
+                    if(getJobCount(team, "术士") === 2 && p.j === "斗士" && getJobCount(team, "斗士") === 1) continue;
+                    if(getJobCount(team, "斗士") === 2 && p.j === "术士" && getJobCount(team, "术士") === 1) continue;
+                    if(p.j === "术士") {
+                        let currentMin = Math.min(...team.map(m => m.p));
+                        if(team.length === 3 && p.p < currentMin * 0.95) continue; 
+                        if(p.p < currentMin && getJobCount(team, "术士") >= 1) continue; 
+                    }
+                    partner = p;
+                    break;
+                }
+                if(!partner) {
+                    partner = currentLeft.find(x => {
+                        if(getJobCount(team, "术士") === 2) return x.j !== "斗士" && getJobCount(team, x.j) < 2;
+                        if(getJobCount(team, "斗士") === 2) return x.j !== "术士" && getJobCount(team, x.j) < 2;
+                        return getJobCount(team, x.j) < 2;
+                    }) || currentLeft[0];
+                }
+                team.push(partner);
+                used.add(partner.n);
             }
             results.push(team);
         }
-
         let h = `<h3>匹配方案结果</h3>`;
         fixedTs.forEach((team, i) => {
-            h += `<div class="card" style="background:#f0f7ff; border-left:5px solid var(--blue);"><b>已成组 ${i+1}</b><div class="res-grid">`;
-            if (Array.isArray(team) && typeof team[0] === 'object') {
-                team.forEach(m => { h += `<div class="res-person"><b>${m.n}</b><span><span class="job-${m.j}">${m.j}</span></span></div>`; });
-            } else {
-                let names = (typeof team === 'string' ? team.split(' 、 ') : team);
-                names.forEach(n => { h += `<div class="res-person"><b>${n}</b><span>已锁定</span></div>`; });
-            }
+            h += `<div class="card" style="background:#f0f7ff; border-left:5px solid var(--blue);"><b>锁定队 ${i+1}</b><div class="res-grid">`;
+            team.forEach(m => { h += `<div class="res-person"><b>${m.n}</b><span><span class="job-${m.j}">${m.j}</span></span></div>`; });
             h += `</div></div>`;
         });
-
         results.forEach((t, i) => {
             h += `<div class="card" style="background:#f6fbf8; border-left:5px solid var(--p);"><b>匹配组 ${i+1}</b><div class="res-grid">`;
             t.forEach(m => {
-                h += `<div class="res-person"><b>${m.n}</b><span><span class="highlight-red">${m.p}${unit}</span> <span class="job-${m.j}">${m.j}</span></span></div>`;
+                h += `<div class="res-person"><b>${m.n}</b><span><span class="job-${m.j}">${m.j}</span> | <span class="highlight-red">${m.p}${unit}</span></span></div>`;
             });
             h += `</div></div>`;
         });
         document.getElementById('res').innerHTML = h;
-        document.getElementById('res').scrollIntoView();
+        showMsg("匹配完成");
+        document.getElementById('res').scrollIntoView({ behavior: 'smooth' });
     }
 </script>
 </body>
