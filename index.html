@@ -3,70 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手-实效增强版</title>
+    <title>组队助手-极简版</title>
     <style>
-        :root { --p: #07c160; --bg: #f7f8fa; --card: #ffffff; --text: #323233; --sub: #969799; --accent: #007aff; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 16px; color: var(--text); }
-        .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-        h3 { margin: 0 0 16px 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; }
-        h3::before { content: ""; width: 4px; height: 16px; background: var(--p); border-radius: 2px; margin-right: 8px; }
+        :root { --p: #07c160; --bg: #f8f9fa; --card: #ffffff; --text: #444; --sub: #999; --blue: #007aff; --orange: #ff9500; }
+        body { font-family: -apple-system, "Helvetica Neue", sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); font-weight: 300; }
         
-        textarea { width: 100%; height: 90px; padding: 12px; border: 1px solid #ebedf0; border-radius: 8px; background: #fafafa; outline: none; box-sizing: border-box; font-size: 14px; margin-bottom: 12px; }
-        .btn-group { display: flex; gap: 10px; }
-        .btn { border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-main { width: 100%; padding: 14px; font-size: 16px; background: var(--p); color: #fff; margin-bottom: 12px; }
-        .btn-sub { flex: 1; padding: 10px; font-size: 14px; background: #fff; border: 1px solid #ebedf0; color: var(--text); }
-        .btn-blue { background: var(--accent); color: #fff; width: 100%; padding: 14px; font-size: 16px; margin-top: 10px; }
+        .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        h3 { margin: 0 0 15px 0; font-size: 15px; font-weight: 400; color: #1a1a1a; display: flex; align-items: center; }
+        h3::before { content: ""; width: 3px; height: 14px; background: var(--p); border-radius: 10px; margin-right: 8px; }
+        
+        textarea { width: 100%; height: 80px; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; outline: none; box-sizing: border-box; font-size: 13px; font-weight: 300; margin-bottom: 10px; }
+        
+        .btn-group { display: flex; gap: 8px; }
+        .btn { border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 300; }
+        .btn-main { width: 100%; padding: 12px; font-size: 15px; background: var(--p); color: #fff; margin-bottom: 10px; }
+        .btn-sub { flex: 1; padding: 8px; font-size: 13px; background: #fff; border: 1px solid #eee; color: #666; }
+        .btn-blue { background: var(--blue); color: #fff; width: 100%; padding: 12px; font-size: 15px; margin-top: 10px; }
 
-        /* 链接弹窗增强 */
-        #shareModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #fff; width: 85%; padding: 20px; border-radius: 16px; position: relative; }
-        #shareLinkArea { width: 100%; height: 80px; font-size: 12px; color: #666; background: #f9f9f9; padding: 10px; border: 1px dashed #ccc; word-break: break-all; margin: 10px 0; border-radius: 4px; overflow-y: auto;}
+        /* 分享弹窗 */
+        #shareModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; width: 80%; padding: 20px; border-radius: 12px; text-align: center; }
+        #shareLinkArea { width: 100%; height: 60px; font-size: 11px; background: #f5f5f5; border: 1px solid #ddd; padding: 8px; border-radius: 4px; margin: 10px 0; font-weight: 300; color: #777; }
 
-        /* 列表 UI */
-        .member-card { background: #fff; border: 1px solid #f2f3f5; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
-        .m-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .m-title { font-size: 15px; font-weight: bold; }
-        .m-tag { font-size: 11px; background: #f0f2f5; color: #646566; padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
-        .tag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
-        .tag { position: relative; padding: 8px 4px; background: #f7f8fa; border: 1.5px solid transparent; border-radius: 8px; text-align: center; }
-        .tag b { display: block; font-size: 13px; color: #323233; }
+        /* 核心布局：一行显示两个 */
+        .member-card { border-bottom: 1px solid #f2f2f2; padding: 12px 0; }
+        .m-header { margin-bottom: 10px; font-size: 14px; color: #000; display: flex; align-items: center; justify-content: space-between;}
+        .m-meta { font-size: 11px; color: var(--sub); margin-left: 5px; }
+        
+        .tag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .tag { padding: 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; text-align: center; transition: 0.2s; }
+        .tag b { display: block; font-size: 13px; font-weight: 400; margin-bottom: 2px; }
         .tag span { display: block; font-size: 10px; color: var(--sub); }
-        .tag.active { background: #eefaf2; border-color: var(--p); color: var(--p); }
+        
+        /* 选中状态：浅绿色调 */
+        .tag.active { background: #f0f9f4; border-color: var(--p); color: var(--p); }
+        .tag.active span { color: var(--p); opacity: 0.7; }
 
-        .res-item { padding: 14px; border-radius: 10px; margin-top: 12px; font-size: 14px; line-height: 1.6; }
-        .type-fixed { background: #f0f7ff; border-left: 4px solid var(--accent); }
-        .type-match { background: #f2faf3; border-left: 4px solid var(--p); }
+        /* 结果色块 */
+        .res-item { padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 13px; line-height: 1.6; }
+        .type-fixed { background: #f0f6ff; border-left: 3px solid var(--blue); color: #333; }
+        .type-match { background: #f4faf6; border-left: 3px solid var(--p); color: #333; }
+        .job-ss { color: #d4380d; font-weight: 400; } /* 术士特别标注颜色 */
     </style>
 </head>
 <body>
 
 <div id="shareModal">
     <div class="modal-content">
-        <h3 style="margin-bottom:10px">复制分享链接</h3>
-        <p style="font-size:12px; color:#888; margin-bottom:10px">请复制下方文本发给群友：</p>
+        <h3 style="justify-content:center">分享链接</h3>
         <textarea id="shareLinkArea" readonly></textarea>
-        <button class="btn btn-main" onclick="selectAllAndCopy()" style="margin-top:10px">一键选中全选链接</button>
-        <button class="btn btn-sub" onclick="document.getElementById('shareModal').style.display='none'" style="width:100%">关闭</button>
+        <button class="btn btn-main" onclick="selectAllCopy()">一键全选</button>
+        <button class="btn btn-sub" style="width:100%" onclick="document.getElementById('shareModal').style.display='none'">关闭</button>
     </div>
 </div>
 
 <div class="card">
-    <h3>1. 导入数据</h3>
-    <textarea id="importBox" placeholder="粘贴微信接龙全文..."></textarea>
+    <h3>1. 导入文本</h3>
+    <textarea id="importBox" placeholder="在此粘贴接龙全文..."></textarea>
     <button class="btn btn-main" onclick="smartImport()">智能解析名单</button>
     <div class="btn-group">
-        <button class="btn btn-sub" onclick="openShareModal()">获取分享链接</button>
-        <button class="btn btn-sub" style="color:#ee0a24" onclick="clearAll()">重置清空</button>
+        <button class="btn btn-sub" onclick="openShare()">获取分享链接</button>
+        <button class="btn btn-sub" style="color:red" onclick="clearAll()">重置</button>
     </div>
 </div>
 
 <div class="card">
-    <h3>2. 待组意向 (勾选理想队友)</h3>
-    <div id="list" style="color:var(--sub); text-align:center; padding:20px 0;">暂无名单</div>
+    <h3>2. 意向勾选 (每行2人)</h3>
+    <div id="list" style="color:#bbb; text-align:center; padding:15px 0; font-size:13px;">等待解析...</div>
 </div>
 
-<button class="btn btn-blue" onclick="match()">生成撮合方案 (术士优先)</button>
+<button class="btn btn-blue" onclick="match()">生成撮合方案</button>
 <div id="res"></div>
 
 <script>
@@ -80,13 +86,12 @@
         if(d) {
             try {
                 const json = JSON.parse(decodeURIComponent(atob(d)));
-                ms = json.ms || []; fixedTs = json.fs || []; unit = json.u || "万";
-                render(); return;
+                ms = json.ms; fixedTs = json.fs; unit = json.u; render(); return;
             } catch(e) {}
         }
-        ms = JSON.parse(localStorage.getItem('t_ms') || '[]');
-        fixedTs = JSON.parse(localStorage.getItem('t_fs') || '[]');
-        unit = localStorage.getItem('t_u') || '万';
+        ms = JSON.parse(localStorage.getItem('tm_ms') || '[]');
+        fixedTs = JSON.parse(localStorage.getItem('tm_fs') || '[]');
+        unit = localStorage.getItem('tm_u') || '万';
         render();
     }
 
@@ -95,15 +100,14 @@
         if(!text.trim()) return;
         unit = text.includes("亿") ? "亿" : "万";
         const lines = text.split('\n');
-        let tMs = [], tFs = [], allF = new Set();
-        lines.forEach(line => {
-            const row = line.trim();
+        let tM = [], tF = [], allF = new Set();
+        lines.forEach(l => {
+            const row = l.trim();
             if(!/^\d+\./.test(row)) return;
-            const content = row.replace(/^\d+\.\s*/, '');
-            const blocks = content.split(/\s+/).filter(b => b.length > 0);
+            const blocks = row.replace(/^\d+\.\s*/, '').split(/\s+/).filter(b => b.length > 0);
             if (!STATUS.some(s => row.includes(s)) && blocks.length >= 4) {
                 const names = blocks.slice(0, 4);
-                tFs.push(names.join(' 、 '));
+                tF.push(names.join(' 、 '));
                 names.forEach(n => allF.add(n));
             } else if (blocks.length > 0) {
                 const name = blocks[0];
@@ -112,27 +116,27 @@
                     JOBS.forEach(j => { if(row.includes(j)) job = j; });
                     const pMatch = row.match(/(\d+\.?\d*)/g);
                     const pVal = pMatch ? parseFloat(pMatch[pMatch.length - 1]) : 0;
-                    if(!tMs.some(m => m.n === name)) tMs.push({n: name, j: job, p: pVal, pre: []});
+                    if(!tM.some(m => m.n === name)) tM.push({n: name, j: job, p: pVal, pre: []});
                 }
             }
         });
-        ms = tMs.filter(m => !allF.has(m.n)); fixedTs = tFs;
+        ms = tM.filter(m => !allF.has(m.n)); fixedTs = tF;
         save(); render();
         document.getElementById('importBox').value = "";
     }
 
     function render() {
         const box = document.getElementById('list');
-        if(!ms.length) { box.innerHTML = '请导入数据'; return; }
+        if(!ms.length) { box.innerHTML = '暂无数据'; return; }
         box.innerHTML = ms.map((m, i) => `
             <div class="member-card">
-                <div class="m-info">
-                    <span class="m-title">${m.n}<span class="m-tag">${m.j}</span><span class="m-tag">${m.p}${unit}</span></span>
+                <div class="m-header">
+                    <span>${m.n}<span class="m-meta">${m.j} | ${m.p}${unit}</span></span>
                 </div>
                 <div class="tag-grid">
                     ${ms.map((t, k) => i===k ? '' : `
                         <div class="tag ${m.pre.includes(t.n)?'active':''}" onclick="sel(${i},'${t.n}')">
-                            <b>${t.n}</b><span>${t.p}${unit}</span>
+                            <b>${t.n}</b><span>${t.p}${unit} · ${t.j}</span>
                         </div>`).join('')}
                 </div>
             </div>`).join('');
@@ -146,27 +150,26 @@
     }
 
     function save() { 
-        localStorage.setItem('t_ms', JSON.stringify(ms)); 
-        localStorage.setItem('t_fs', JSON.stringify(fixedTs)); 
-        localStorage.setItem('t_u', unit);
+        localStorage.setItem('tm_ms', JSON.stringify(ms)); 
+        localStorage.setItem('tm_fs', JSON.stringify(fixedTs)); 
+        localStorage.setItem('tm_u', unit);
     }
 
-    function openShareModal() {
+    function openShare() {
         const data = btoa(encodeURIComponent(JSON.stringify({ms, fs:fixedTs, u:unit})));
         const url = window.location.origin + window.location.pathname + "?d=" + data;
         document.getElementById('shareLinkArea').value = url;
         document.getElementById('shareModal').style.display = 'flex';
     }
 
-    function selectAllAndCopy() {
+    function selectAllCopy() {
         const area = document.getElementById('shareLinkArea');
         area.select();
-        area.setSelectionRange(0, 99999); 
         document.execCommand('copy');
-        alert("已全选并尝试复制！如果提示失败，请长按文本框手动全选复制。");
+        alert("已全选，如未自动复制请手动长按。");
     }
 
-    function clearAll() { if(confirm("重置数据？")) { localStorage.clear(); location.reload(); } }
+    function clearAll() { if(confirm("重置？")) { localStorage.clear(); location.reload(); } }
 
     function match() {
         let used = new Set(), results = [];
@@ -191,11 +194,11 @@
             results.push(team);
         }
 
-        let h = `<h3>分配结果方案</h3>`;
-        fixedTs.forEach((t, i) => h += `<div class="res-item type-fixed"><b>接龙已成组 ${i+1}</b><br>${t}</div>`);
+        let h = `<h3>结果建议方案</h3>`;
+        fixedTs.forEach((t, i) => h += `<div class="res-item type-fixed"><b>固定组 ${i+1}</b><br>${t}</div>`);
         results.forEach((t, i) => {
-            const hasSS = t.some(m => m.j==="术士") ? " [✅含术士]" : " [❌无术士]";
-            h += `<div class="res-item type-match"><b>系统撮合组 ${i+1}${hasSS}</b><br>${t.map(m => `${m.n}(${m.p}${unit})`).join(' 、 ')}</div>`;
+            const hasSS = t.some(m => m.j==="术士") ? " (含术士)" : " (缺术士)";
+            h += `<div class="res-item type-match"><b>推荐组 ${i+1}${hasSS}</b><br>${t.map(m => `${m.n}(${m.p}${unit})`).join(' 、 ')}</div>`;
         });
         document.getElementById('res').innerHTML = h;
         document.getElementById('res').scrollIntoView();
