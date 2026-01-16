@@ -3,39 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手-专业版(含删除功能)</title>
+    <title>组队助手</title>
     <style>
         :root { --p: #07c160; --bg: #f6f7f9; --sub: #888; --red: #ff4d4f; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         h3 { margin: 0 0 15px 0; font-size: 17px; display: flex; align-items: center; }
         h3::before { content: ""; width: 4px; height: 16px; background: var(--p); border-radius: 2px; margin-right: 8px; }
-        
         input { width: 100%; padding: 12px 15px; margin-bottom: 12px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 15px; background: #fafafa; outline: none; }
         input:focus { border-color: var(--p); background: #fff; }
-        
         .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 600; color: #fff; margin-bottom: 10px; cursor: pointer; font-size: 16px; }
         .btn:active { opacity: 0.8; }
         .btn-green { background: var(--p); }
         .btn-orange { background: #ff9500; }
         .btn-blue { background: #007aff; }
-
         .member-item { border-bottom: 1px solid #f0f0f0; padding: 15px 0; position: relative; }
         .member-item:last-child { border: none; }
         .m-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .m-info { font-weight: bold; font-size: 16px; }
-        /* 删除按钮样式 */
         .del-btn { color: var(--red); font-size: 13px; cursor: pointer; padding: 5px 10px; border: 1px solid var(--red); border-radius: 6px; }
-        
         .m-detail { font-size: 13px; color: var(--sub); margin-bottom: 10px; }
-        
         .tag { display: inline-block; padding: 6px 12px; background: #f0f2f5; border-radius: 8px; margin: 4px 6px 0 0; font-size: 13px; color: #555; border: 1px solid transparent; }
         .tag.active { background: #e7f7ed; color: var(--p); border-color: var(--p); font-weight: bold; }
-        
         #shareBox { display: none; background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 12px; margin-top: 5px; }
         #urlOut { width: 100%; word-break: break-all; font-size: 12px; color: #666; background: #fff; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #eee; user-select: all; -webkit-user-select: all; }
-        
-        .res-item { background: #f0f9eb; padding: 12px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--p); font-size: 14px; }
+        .res-item { background: #f0f9eb; padding: 12px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--p); font-size: 14px; line-height: 1.6; }
     </style>
 </head>
 <body>
@@ -47,7 +39,6 @@
     <input id="up" placeholder="战力 (如：350万)">
     <button class="btn btn-green" onclick="addM()">确定录入</button>
     <button class="btn btn-orange" onclick="make()">生成分享链接</button>
-    
     <div id="shareBox">
         <div style="font-size:13px; font-weight:bold; color:#856404;">链接已生成！请长按下方文字复制：</div>
         <div id="urlOut"></div>
@@ -85,12 +76,10 @@
         render();
     }
 
-    // 删除成员功能
     function delM(idx) {
-        if(confirm("确定要删除成员 " + ms[idx].n + " 吗？")) {
+        if(confirm("确定要删除 " + ms[idx].n + " 吗？")) {
             var nameToDelete = ms[idx].n;
             ms.splice(idx, 1);
-            // 同时清理其他成员已勾选的该成员记录
             for(var i=0; i<ms.length; i++) {
                 var pIdx = ms[i].pre.indexOf(nameToDelete);
                 if(pIdx > -1) ms[i].pre.splice(pIdx, 1);
@@ -101,18 +90,12 @@
 
     function render() {
         var box = document.getElementById('list');
-        if(ms.length == 0) {
-            box.innerHTML = '暂无名单，请录入...';
-            return;
-        }
+        if(ms.length == 0) { box.innerHTML = '暂无名单，请录入...'; return; }
         var h = "";
         for(var i=0; i<ms.length; i++){
             h += '<div class="member-item">';
-            h += '  <div class="m-header">';
-            h += '    <div class="m-info">'+ms[i].n+'</div>';
-            h += '    <div class="del-btn" onclick="delM('+i+')">删除</div>';
-            h += '  </div>';
-            h += '  <div class="m-detail">职业：'+ms[i].j+' | 战力：'+ms[i].p+' | 已选：'+ms[i].pre.length+'/3</div>';
+            h += '  <div class="m-header"><div class="m-info">'+ms[i].n+'</div><div class="del-btn" onclick="delM('+i+')">删除</div></div>';
+            h += '  <div class="m-detail">'+ms[i].j+' | '+ms[i].p+' | 已选：'+ms[i].pre.length+'/3</div>';
             for(var k=0; k<ms.length; k++){
                 if(i != k){
                     var active = ms[i].pre.indexOf(ms[k].n) > -1;
@@ -143,25 +126,51 @@
         document.getElementById('shareBox').scrollIntoView();
     }
 
+    // 核心优化：匹配结果显示完整信息
     function match() {
         if(ms.length == 0) return;
         var used = {}, ts = [], pool = JSON.parse(JSON.stringify(ms));
+        
+        // 创建一个查找字典，方便快速获取成员的职业和战力
+        var dict = {};
+        ms.forEach(function(item){ dict[item.n] = item; });
+
+        function formatInfo(name) {
+            var info = dict[name];
+            return info ? name + '(' + info.j + '，' + info.p + ')' : name;
+        }
+
         while(pool.length > 0) {
-            var c = pool.shift(); if(used[c.n]) continue;
-            var t = [c.n + '(' + c.j + ')']; used[c.n] = true;
+            var c = pool.shift(); 
+            if(used[c.n]) continue;
+            
+            var team = [formatInfo(c.n)]; 
+            used[c.n] = true;
+
+            // 匹配意向队友
             for(var i=0; i<c.pre.length; i++){
-                if(!used[c.pre[i]] && t.length < 4){ t.push(c.pre[i]); used[c.pre[i]] = true; }
+                var target = c.pre[i];
+                if(!used[target] && team.length < 4){ 
+                    team.push(formatInfo(target)); 
+                    used[target] = true; 
+                }
             }
+            // 填充剩余名额
             for(var i=0; i<ms.length; i++){
-                if(!used[ms[i].n] && t.length < 4){ t.push(ms[i].n); used[ms[i].n] = true; }
+                var target = ms[i].n;
+                if(!used[target] && team.length < 4){ 
+                    team.push(formatInfo(target)); 
+                    used[target] = true; 
+                }
             }
-            ts.push(t);
+            ts.push(team);
         }
         var h = "";
         for(var i=0; i<ts.length; i++){
-            h += '<div class="res-item"><b>第 '+(i+1)+' 组：</b>' + ts[i].join(' 、 ') + '</div>';
+            h += '<div class="res-item"><b>第 '+(i+1)+' 组：</b><br>' + ts[i].join(' 、 ') + '</div>';
         }
         document.getElementById('res').innerHTML = '<div class="card"><h3>匹配方案</h3>'+h+'</div>';
+        document.getElementById('res').scrollIntoView();
     }
 </script>
 </body>
