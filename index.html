@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手-定制视觉版</title>
+    <title>组队助手-金芒版</title>
     <style>
-        :root { --p: #07c160; --bg: #f8f9fa; --card: #ffffff; --text: #444; --sub: #999; --blue: #007aff; --red: #ee0a24; --gold: #b8860b; }
-        body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); font-weight: 300; }
+        :root { --p: #07c160; --bg: #f8f9fa; --card: #ffffff; --text: #444; --blue: #007aff; --red: #ee0a24; --gold: #FFD700; }
+        body { font-family: "Heiti SC", "STHeiti", "SimHei", "Microsoft YaHei", sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); font-weight: 300; }
         
         .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         h3 { margin: 0 0 15px 0; font-size: 15px; font-weight: 400; color: #1a1a1a; display: flex; align-items: center; }
@@ -14,64 +14,62 @@
         
         textarea { width: 100%; height: 80px; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; outline: none; box-sizing: border-box; font-size: 13px; font-weight: 300; margin-bottom: 10px; }
         
-        .btn-group { display: flex; gap: 8px; }
-        .btn { border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 300; }
-        .btn-main { width: 100%; padding: 12px; font-size: 15px; background: var(--p); color: #fff; margin-bottom: 10px; }
-        .btn-sub { flex: 1; padding: 8px; font-size: 13px; background: #fff; border: 1px solid #eee; color: #666; }
-        .btn-blue { background: var(--blue); color: #fff; width: 100%; padding: 12px; font-size: 15px; margin-top: 10px; }
+        /* 统一化按钮样式 */
+        .btn { width: 100%; border: none; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: 300; cursor: pointer; color: #fff; margin-bottom: 10px; display: block; }
+        .btn-green { background: var(--p); }
+        .btn-blue { background: var(--blue); }
+        .btn-red { background: var(--red); }
+        .btn-group { display: flex; gap: 10px; }
+        .btn-half { flex: 1; }
 
         /* 分享弹窗 */
         #shareModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #fff; width: 80%; padding: 20px; border-radius: 12px; text-align: center; }
         #shareLinkArea { width: 100%; height: 60px; font-size: 11px; background: #f5f5f5; border: 1px solid #ddd; padding: 8px; border-radius: 4px; margin: 10px 0; font-weight: 300; color: #777; }
 
-        /* 核心列表布局 */
+        /* 名单样式 */
         .member-card { border-bottom: 1px solid #f2f2f2; padding: 12px 0; }
         .m-header { margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
         
-        /* 样式定制：黑体黑色加粗 */
-        .c-name { font-weight: bold; color: #000; font-family: "Heiti SC", "STHeiti", "SimHei", sans-serif; font-size: 15px; }
-        /* 样式定制：红色战力 */
+        /* 样式定制 */
+        .c-name { font-weight: bold; color: #000; font-size: 15px; }
         .c-power { color: var(--red); font-weight: 400; }
-        /* 样式定制：黄色职业 */
-        .c-job { color: var(--gold); font-weight: 400; font-size: 11px; }
+        .c-job { color: var(--gold); font-weight: bold; text-shadow: 0 0 1px rgba(0,0,0,0.1); font-size: 11px; }
         
         .tag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .tag { padding: 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; text-align: center; cursor: pointer; }
+        .tag { padding: 10px 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; text-align: center; cursor: pointer; }
         .tag .t-n { display: block; font-weight: bold; color: #000; font-size: 14px; margin-bottom: 2px; }
-        .tag .t-m { display: block; font-size: 10px; }
         
-        /* 选中状态 */
         .tag.active { background: #f0f9f4; border-color: var(--p); }
         .tag.active .t-n { color: var(--p); }
 
-        /* 结果展示 */
+        /* 匹配结果 */
         .res-item { padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 13px; line-height: 1.6; }
         .type-fixed { background: #f0f6ff; border-left: 3px solid var(--blue); }
         .type-match { background: #f4faf6; border-left: 3px solid var(--p); }
         .res-n { font-weight: bold; color: #000; }
         .res-p { color: var(--red); }
-        .res-j { color: var(--gold); }
+        .res-j { color: var(--gold); font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="shareModal">
     <div class="modal-content">
-        <h3 style="justify-content:center">获取分享链接</h3>
+        <h3>获取分享链接</h3>
         <textarea id="shareLinkArea" readonly></textarea>
-        <button class="btn btn-main" onclick="selectAllCopy()">一键全选复制</button>
-        <button class="btn btn-sub" style="width:100%" onclick="document.getElementById('shareModal').style.display='none'">关闭</button>
+        <button class="btn btn-green" onclick="selectAllCopy()">一键全选复制</button>
+        <button class="btn btn-red" style="margin:0" onclick="document.getElementById('shareModal').style.display='none'">关闭</button>
     </div>
 </div>
 
 <div class="card">
     <h3>1. 导入数据</h3>
-    <textarea id="importBox" placeholder="粘贴接龙文本..."></textarea>
-    <button class="btn btn-main" onclick="smartImport()">智能解析名单</button>
+    <textarea id="importBox" placeholder="在此粘贴接龙文本..."></textarea>
+    <button class="btn btn-green" onclick="smartImport()">智能解析名单</button>
     <div class="btn-group">
-        <button class="btn btn-sub" onclick="openShare()">分享勾选页面</button>
-        <button class="btn btn-sub" style="color:var(--red)" onclick="clearAll()">清空重置</button>
+        <button class="btn btn-blue btn-half" onclick="openShare()">分享勾选页面</button>
+        <button class="btn btn-red btn-half" onclick="clearAll()">清空重置数据</button>
     </div>
 </div>
 
@@ -80,7 +78,7 @@
     <div id="list" style="color:#bbb; text-align:center; padding:15px 0;">等待解析数据...</div>
 </div>
 
-<button class="btn btn-blue" onclick="match()">开始撮合匹配</button>
+<button class="btn btn-blue" style="font-size: 16px; padding: 15px;" onclick="match()">开始撮合匹配</button>
 <div id="res"></div>
 
 <script>
@@ -146,7 +144,7 @@
                     ${ms.map((t, k) => i===k ? '' : `
                         <div class="tag ${m.pre.includes(t.n)?'active':''}" onclick="sel(${i},'${t.n}')">
                             <span class="t-n">${t.n}</span>
-                            <span class="t-m"><span class="c-power">${t.p}${unit}</span> <span class="c-job">${t.j}</span></span>
+                            <span style="font-size:10px"><span class="c-power">${t.p}${unit}</span> <span class="c-job">${t.j}</span></span>
                         </div>`).join('')}
                 </div>
             </div>`).join('');
@@ -176,10 +174,10 @@
         const area = document.getElementById('shareLinkArea');
         area.select();
         document.execCommand('copy');
-        alert("链接已选中复制。");
+        alert("已全选，请长按复制链接发给队友。");
     }
 
-    function clearAll() { if(confirm("重置所有数据？")) { localStorage.clear(); location.reload(); } }
+    function clearAll() { if(confirm("确定清空所有数据并重置？")) { localStorage.clear(); location.reload(); } }
 
     function match() {
         let used = new Set(), results = [];
