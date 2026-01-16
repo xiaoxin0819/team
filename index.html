@@ -5,17 +5,16 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
     <title>组队助手</title>
     <style>
-        :root { --p: #07c160; --bg: #f8f9fa; --card: #ffffff; --text: #444; --blue: #007aff; --red: #ee0a24; --gold: #FFD700; --orange: #ff9500; }
+        :root { --p: #07c160; --bg: #f8f9fa; --card: #ffffff; --text: #444; --blue: #007aff; --red: #ee0a24; --gold: #ffb800; --orange: #ff9500; }
         body { font-family: "Heiti SC", "STHeiti", "SimHei", "Microsoft YaHei", sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); font-weight: 300; }
         
-        /* 卡片基础样式 */
         .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         h3 { margin: 0 0 15px 0; font-size: 15px; font-weight: 400; color: #1a1a1a; display: flex; align-items: center; }
         h3::before { content: ""; width: 3px; height: 14px; background: var(--p); border-radius: 2px; margin-right: 8px; }
         
-        textarea, input, select { width: 100%; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; outline: none; box-sizing: border-box; font-size: 13px; font-weight: 300; margin-bottom: 10px; }
+        textarea, input, select { width: 100%; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; outline: none; box-sizing: border-box; font-size: 13px; margin-bottom: 10px; }
 
-        .btn { width: 100%; border: none; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: 300; cursor: pointer; color: #fff; margin-bottom: 10px; display: block; text-align: center; }
+        .btn { width: 100%; border: none; border-radius: 8px; padding: 12px; font-size: 15px; cursor: pointer; color: #fff; margin-bottom: 10px; display: block; text-align: center; font-weight: 400; }
         .btn-green { background: var(--p); }
         .btn-blue { background: var(--blue); }
         .btn-red { background: var(--red); }
@@ -23,38 +22,37 @@
         .btn-group { display: flex; gap: 10px; }
         .btn-half { flex: 1; }
 
-        /* 弹窗样式 */
+        /* 弹窗样式还原 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #fff; width: 85%; padding: 25px 20px; border-radius: 15px; text-align: center; max-height: 80vh; overflow-y: auto; }
+        .modal-content { background: #fff; width: 85%; padding: 25px 20px; border-radius: 15px; text-align: center; }
         
-        /* 文本色彩体系 */
-        .c-name { font-weight: bold; color: #000; font-size: 15px; }
-        .c-power { color: var(--red); font-weight: 400; }
-        .c-job { color: var(--gold); font-weight: bold; font-size: 11px; }
-
-        /* 待匹配成员卡片 */
-        .member-card { border-bottom: 1px solid #f2f2f2; padding: 15px 0; position: relative; }
-        .m-header { margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; padding-right: 45px; }
-        .btn-del { position: absolute; right: 0; top: 12px; color: var(--red); font-size: 12px; border: 1px solid var(--red); padding: 2px 6px; border-radius: 4px; cursor: pointer; }
+        /* 待匹配成员列表样式还原 (对应截图3) */
+        .member-block { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .m-header-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .m-name-title { font-size: 18px; font-weight: bold; color: #000; }
+        .m-info-right { font-size: 13px; }
+        .btn-del-text { color: var(--red); border: 1px solid #ffccd3; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 10px; background: #fff5f6; }
         
-        .tag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .tag { padding: 10px 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; text-align: center; cursor: pointer; }
-        .tag.active { background: #f0f9f4; border-color: var(--p); }
-        .tag.active .t-n { color: var(--p); }
-
-        /* 匹配方案结果展示 */
-        .res-item { padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 13px; line-height: 1.6; text-align: left; }
-        .type-fixed { background: #f0f6ff; border-left: 4px solid var(--blue); }
-        .type-match { background: #f4faf6; border-left: 4px solid var(--p); }
+        .tag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .tag-box { border: 1px solid #eee; border-radius: 6px; padding: 12px 5px; text-align: center; background: #fff; position: relative; }
+        .tag-box.active { border-color: var(--p); background: #f0f9f4; }
+        .tag-box .t-name { display: block; font-weight: bold; font-size: 16px; color: #000; margin-bottom: 4px; }
+        .tag-box .t-sub { font-size: 12px; display: block; }
+        
+        /* 结果样式还原 (对应截图1) */
+        .res-item { padding: 15px; border-radius: 12px; margin-top: 12px; font-size: 14px; line-height: 1.6; position: relative; }
+        .type-fixed { background: #f0f7ff; border-left: 5px solid #2f88ff; }
+        .type-match { background: #f6fbf8; border-left: 5px solid #07c160; }
+        .res-title { font-weight: bold; font-size: 15px; color: #333; margin-bottom: 5px; display: block; }
     </style>
 </head>
 <body>
 
 <div id="parseModal" class="modal">
     <div class="modal-content">
-        <h3 style="justify-content:center; color:#07c160; font-size:18px;">✅ 识别成功！</h3>
+        <h3 style="justify-content:center; color:var(--p);">识别成功！</h3>
         <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
-        <div id="parseSummary" style="font-size:15px; line-height:2; text-align:left; padding:0 10px;"></div>
+        <div id="parseSummary" style="text-align:left; line-height:2.2; font-size:15px;"></div>
         <button class="btn btn-green" style="margin-top:20px;" onclick="document.getElementById('parseModal').style.display='none'">确认并继续</button>
     </div>
 </div>
@@ -62,16 +60,15 @@
 <div class="card">
     <h3>1. 录入数据</h3>
     <textarea id="importBox" placeholder="在此粘贴接龙文本..."></textarea>
-    <button class="btn btn-green" onclick="smartImport()">智能解析接龙</button>
+    <button class="btn btn-green" onclick="smartImport()">智能解析</button>
     
-    <div class="manual-box" style="background:#fdfdfd; border:1px dashed #ddd; padding:12px; border-radius:10px;">
-        <div style="font-size:12px; margin-bottom:8px; color:#666;">手动录入：</div>
+    <div style="background:#fdfdfd; border:1px dashed #ddd; padding:12px; border-radius:10px;">
         <input type="text" id="m_name" placeholder="昵称">
         <select id="m_job">
             <option value="术士">术士</option><option value="贤者">贤者</option><option value="骑士">骑士</option><option value="斗士">斗士</option>
         </select>
         <input type="number" id="m_power" placeholder="战力数值">
-        <button class="btn btn-orange btn-sm" onclick="addManual()">确认加入名单</button>
+        <button class="btn btn-orange" style="margin:0; padding:8px;" onclick="addManual()">确认加入名单</button>
     </div>
 
     <div class="btn-group" style="margin-top:15px;">
@@ -82,10 +79,10 @@
 
 <div class="card">
     <h3>2. 待匹配人员</h3>
-    <div id="list" style="color:#bbb; text-align:center; padding:15px 0;">暂无数据</div>
+    <div id="list"></div>
 </div>
 
-<button class="btn btn-blue" style="font-size: 16px; padding: 18px; border-radius:12px;" onclick="match()">生成方案</button>
+<button class="btn btn-blue" style="font-size: 17px; padding: 18px; border-radius:15px; font-weight:bold;" onclick="match()">生成最终方案</button>
 <div id="res"></div>
 
 <script>
@@ -114,7 +111,6 @@
         unit = text.includes("亿") ? "亿" : "万";
         const lines = text.split('\n');
         let tM = [], tF = [], allF = new Set();
-        
         lines.forEach(l => {
             const row = l.trim();
             if(!/^\d+\./.test(row)) return;
@@ -134,15 +130,12 @@
                 }
             }
         });
-        ms = tM.filter(m => !allF.has(m.n));
-        fixedTs = tF;
-        save();
-        render();
-
-        // 颜色修复：固定组蓝色、待匹配绿色、单位红色
+        ms = tM.filter(m => !allF.has(m.n)); fixedTs = tF;
+        save(); render();
+        // 还原弹窗数值颜色
         const summary = `
-            ♦ 固定组 (已成)： <span style="color:var(--blue); font-weight:bold; font-size:18px;">${fixedTs.length}</span> 组<br>
-            ♦ 待匹配人员： <span style="color:var(--p); font-weight:bold; font-size:18px;">${ms.length}</span> 名<br>
+            ♦ 固定组 (已成)： <span style="color:var(--blue); font-weight:bold;">${fixedTs.length}</span> 组<br>
+            ♦ 待匹配人员： <span style="color:var(--p); font-weight:bold;">${ms.length}</span> 名<br>
             ♦ 战力单位： <span style="color:var(--red); font-weight:bold;">${unit}</span>
         `;
         document.getElementById('parseSummary').innerHTML = summary;
@@ -154,31 +147,38 @@
         const name = document.getElementById('m_name').value.trim();
         const job = document.getElementById('m_job').value;
         const power = parseFloat(document.getElementById('m_power').value);
-        if(!name || isNaN(power)) return alert("必填昵称和战力");
+        if(!name || isNaN(power)) return;
         ms.push({ n: name, j: job, p: power, pre: [] });
         save(); render();
         document.getElementById('m_name').value = ""; document.getElementById('m_power').value = "";
     }
 
     function removeOne(idx) {
-        if(confirm(`确定移除 ${ms[idx].n}？`)) { ms.splice(idx, 1); save(); render(); }
+        ms.splice(idx, 1); save(); render();
     }
 
+    // 还原截图3的卡片字体和排版
     function render() {
         const box = document.getElementById('list');
-        if(!ms.length) { box.innerHTML = '暂无数据'; return; }
+        if(!ms.length) { box.innerHTML = '<div style="text-align:center;color:#bbb;padding:20px;">等待录入数据...</div>'; return; }
         box.innerHTML = ms.map((m, i) => `
-            <div class="member-card">
-                <div class="m-header">
-                    <span class="c-name">${m.n}</span>
-                    <span style="font-size:11px"><span class="c-job">${m.j}</span> | <span class="c-power">${m.p}${unit}</span></span>
+            <div class="member-block">
+                <div class="m-header-line">
+                    <span class="m-name-title">${m.n}</span>
+                    <div class="m-info-right">
+                        <span style="color:var(--gold); font-weight:bold;">${m.j}</span> | 
+                        <span style="color:var(--red);">${m.p}${unit}</span>
+                        <span class="btn-del-text" onclick="removeOne(${i})">移除</span>
+                    </div>
                 </div>
-                <div class="btn-del" onclick="removeOne(${i})">移除</div>
                 <div class="tag-grid">
                     ${ms.map((t, k) => i===k ? '' : `
-                        <div class="tag ${m.pre.includes(t.n)?'active':''}" onclick="sel(${i},'${t.n}')">
-                            <span class="t-n">${t.n}</span>
-                            <span style="font-size:10px"><span class="c-power">${t.p}${unit}</span> <span class="c-job">${t.j}</span></span>
+                        <div class="tag-box ${m.pre.includes(t.n)?'active':''}" onclick="sel(${i},'${t.n}')">
+                            <span class="t-name">${t.n}</span>
+                            <span class="t-sub">
+                                <span style="color:var(--red)">${t.p}${unit}</span> 
+                                <span style="color:var(--gold); font-weight:bold;">${t.j}</span>
+                            </span>
                         </div>`).join('')}
                 </div>
             </div>`).join('');
@@ -187,7 +187,7 @@
     function sel(idx, name) {
         const m = ms[idx], p = m.pre.indexOf(name);
         if(p > -1) m.pre.splice(p, 1);
-        else { if(m.pre.length >= 3) return alert("限选3人"); m.pre.push(name); }
+        else { if(m.pre.length >= 3) return; m.pre.push(name); }
         save(); render();
     }
 
@@ -199,18 +199,15 @@
 
     function openShare() {
         const data = btoa(encodeURIComponent(JSON.stringify({ms, fs:fixedTs, u:unit})));
-        const url = window.location.origin + window.location.pathname + "?d=" + data;
-        window.prompt("请复制分享链接：", url);
+        window.prompt("分享链接：", window.location.origin + window.location.pathname + "?d=" + data);
     }
 
-    function clearAll() { if(confirm("全部重置？")) { localStorage.clear(); location.reload(); } }
+    function clearAll() { if(confirm("重置吗？")) { localStorage.clear(); location.reload(); } }
 
-    // --- 分组计数逻辑重构 ---
     function match() {
         let used = new Set(), intentResults = [], strongResults = [];
         let pool = [...ms].sort((a,b) => b.p - a.p);
 
-        // 1. 意向组匹配
         pool.forEach(m => {
             if (used.has(m.n)) return;
             if (m.pre.length > 0) {
@@ -221,11 +218,10 @@
                         if (favMember) { team.push(favMember); used.add(favName); }
                     }
                 });
-                if (team.length > 0) intentResults.push(team);
+                intentResults.push(team);
             }
         });
 
-        // 2. 强强组匹配
         while (true) {
             let left = pool.filter(p => !used.has(p.n));
             if (left.length === 0) break;
@@ -243,20 +239,17 @@
             strongResults.push(team);
         }
 
-        // 渲染结果：分开计数
-        let h = `<h3>匹配方案结果</h3>`;
-        fixedTs.forEach((t, i) => h += `<div class="res-item type-fixed"><b>已成组 ${i+1}</b><br>${t}</div>`);
+        let h = `<h3 style="margin-top:20px;">匹配方案结果</h3>`;
+        fixedTs.forEach((t, i) => h += `<div class="res-item type-fixed"><span class="res-title">已成组 ${i+1}</span>${t}</div>`);
         
-        // 意向组从1开始
         intentResults.forEach((t, i) => {
             const hasSS = t.some(m => m.j==="术士") ? "" : " (缺术士)";
-            h += `<div class="res-item type-match" style="border-left-color: #ff9500;"><b>意向组 ${i+1}${hasSS}</b><br>${t.map(m => `<span style="font-weight:bold;color:#000;">${m.n}</span>(<span style="color:var(--red)">${m.p}${unit}</span> <span style="color:var(--gold);font-weight:bold;">${m.j}</span>)`).join(' 、 ')}</div>`;
+            h += `<div class="res-item type-match" style="border-left-color: var(--orange);"><span class="res-title">意向组 ${i+1}${hasSS}</span>${t.map(m => `<b>${m.n}</b>(<span style="color:var(--red)">${m.p}${unit}</span> <span style="color:var(--gold); font-weight:bold;">${m.j}</span>)`).join(' 、 ')}</div>`;
         });
 
-        // 强强组从1重新计数
         strongResults.forEach((t, i) => {
             const hasSS = t.some(m => m.j==="术士") ? "" : " (缺术士)";
-            h += `<div class="res-item type-match"><b>强强组 ${i+1}${hasSS}</b><br>${t.map(m => `<span style="font-weight:bold;color:#000;">${m.n}</span>(<span style="color:var(--red)">${m.p}${unit}</span> <span style="color:var(--gold);font-weight:bold;">${m.j}</span>)`).join(' 、 ')}</div>`;
+            h += `<div class="res-item type-match"><span class="res-title">强强组 ${i+1}${hasSS}</span>${t.map(m => `<b>${m.n}</b>(<span style="color:var(--red)">${m.p}${unit}</span> <span style="color:var(--gold); font-weight:bold;">${m.j}</span>)`).join(' 、 ')}</div>`;
         });
 
         document.getElementById('res').innerHTML = h;
