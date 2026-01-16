@@ -3,54 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手-战力均衡版</title>
+    <title>组队助手-实效增强版</title>
     <style>
-        :root { --p: #07c160; --bg: #f6f7f9; --sub: #888; --red: #ff4d4f; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
-        .card { background: #fff; border-radius: 16px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        h3 { margin: 0 0 15px 0; font-size: 16px; display: flex; align-items: center; }
+        :root { --p: #07c160; --bg: #f7f8fa; --card: #ffffff; --text: #323233; --sub: #969799; --accent: #007aff; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 16px; color: var(--text); }
+        .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        h3 { margin: 0 0 16px 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; }
         h3::before { content: ""; width: 4px; height: 16px; background: var(--p); border-radius: 2px; margin-right: 8px; }
-        textarea { width: 100%; height: 100px; padding: 12px; border: 1px solid #eee; border-radius: 10px; background: #fafafa; outline: none; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 600; color: #fff; margin-bottom: 10px; cursor: pointer; font-size: 16px; }
-        .btn-green { background: var(--p); }
-        .btn-orange { background: #ff9500; }
-        .btn-blue { background: #007aff; }
-        .btn-gray { background: #8e8e93; font-size: 12px; padding: 8px; color: #fff; border:none; border-radius: 8px;}
-        .member-item { border-bottom: 1px solid #f0f0f0; padding: 12px 0; }
-        .m-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-        .m-name { font-weight: bold; font-size: 15px; }
-        .tag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
-        .tag { padding: 6px; background: #f2f4f7; border-radius: 6px; text-align: center; border: 1px solid transparent; }
-        .tag.active { background: #e7f7ed; color: var(--p); border-color: var(--p); font-weight: bold; }
-        .tag span { display: block; font-size: 10px; opacity: 0.7; font-weight: normal; }
-        .res-item { background: #f0f9eb; padding: 12px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--p); font-size: 13px; line-height: 1.6; }
-        .fixed-team { background: #eef5fe; border-left: 4px solid #007aff; }
+        
+        textarea { width: 100%; height: 90px; padding: 12px; border: 1px solid #ebedf0; border-radius: 8px; background: #fafafa; outline: none; box-sizing: border-box; font-size: 14px; margin-bottom: 12px; }
+        .btn-group { display: flex; gap: 10px; }
+        .btn { border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-main { width: 100%; padding: 14px; font-size: 16px; background: var(--p); color: #fff; margin-bottom: 12px; }
+        .btn-sub { flex: 1; padding: 10px; font-size: 14px; background: #fff; border: 1px solid #ebedf0; color: var(--text); }
+        .btn-blue { background: var(--accent); color: #fff; width: 100%; padding: 14px; font-size: 16px; margin-top: 10px; }
+
+        /* 链接弹窗增强 */
+        #shareModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; width: 85%; padding: 20px; border-radius: 16px; position: relative; }
+        #shareLinkArea { width: 100%; height: 80px; font-size: 12px; color: #666; background: #f9f9f9; padding: 10px; border: 1px dashed #ccc; word-break: break-all; margin: 10px 0; border-radius: 4px; overflow-y: auto;}
+
+        /* 列表 UI */
+        .member-card { background: #fff; border: 1px solid #f2f3f5; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+        .m-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .m-title { font-size: 15px; font-weight: bold; }
+        .m-tag { font-size: 11px; background: #f0f2f5; color: #646566; padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
+        .tag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+        .tag { position: relative; padding: 8px 4px; background: #f7f8fa; border: 1.5px solid transparent; border-radius: 8px; text-align: center; }
+        .tag b { display: block; font-size: 13px; color: #323233; }
+        .tag span { display: block; font-size: 10px; color: var(--sub); }
+        .tag.active { background: #eefaf2; border-color: var(--p); color: var(--p); }
+
+        .res-item { padding: 14px; border-radius: 10px; margin-top: 12px; font-size: 14px; line-height: 1.6; }
+        .type-fixed { background: #f0f7ff; border-left: 4px solid var(--accent); }
+        .type-match { background: #f2faf3; border-left: 4px solid var(--p); }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h3>1. 粘贴接龙内容</h3>
-    <textarea id="importBox" placeholder="自动识别战力与术士职业..."></textarea>
-    <button class="btn btn-green" onclick="smartImport()">智能解析名单</button>
-    <div style="display: flex; gap: 10px;">
-        <button class="btn btn-orange" style="flex: 1;" onclick="copyShareLink()">复制分享链接</button>
-        <button class="btn btn-gray" style="flex: 0.5;" onclick="clearAll()">重置数据</button>
+<div id="shareModal">
+    <div class="modal-content">
+        <h3 style="margin-bottom:10px">复制分享链接</h3>
+        <p style="font-size:12px; color:#888; margin-bottom:10px">请复制下方文本发给群友：</p>
+        <textarea id="shareLinkArea" readonly></textarea>
+        <button class="btn btn-main" onclick="selectAllAndCopy()" style="margin-top:10px">一键选中全选链接</button>
+        <button class="btn btn-sub" onclick="document.getElementById('shareModal').style.display='none'" style="width:100%">关闭</button>
     </div>
 </div>
 
 <div class="card">
-    <h3>2. 待匹配意向 (战力已对齐)</h3>
-    <div id="list" style="color:#999; text-align:center;">暂无数据</div>
+    <h3>1. 导入数据</h3>
+    <textarea id="importBox" placeholder="粘贴微信接龙全文..."></textarea>
+    <button class="btn btn-main" onclick="smartImport()">智能解析名单</button>
+    <div class="btn-group">
+        <button class="btn btn-sub" onclick="openShareModal()">获取分享链接</button>
+        <button class="btn btn-sub" style="color:#ee0a24" onclick="clearAll()">重置清空</button>
+    </div>
 </div>
 
-<button class="btn btn-blue" onclick="match()">战力均衡算法匹配</button>
+<div class="card">
+    <h3>2. 待组意向 (勾选理想队友)</h3>
+    <div id="list" style="color:var(--sub); text-align:center; padding:20px 0;">暂无名单</div>
+</div>
+
+<button class="btn btn-blue" onclick="match()">生成撮合方案 (术士优先)</button>
 <div id="res"></div>
 
 <script>
-    var ms = []; var fixedTs = [];
+    let ms = [], fixedTs = [], unit = "万";
     const JOBS = ["术士", "骑士", "斗士", "贤者"];
-    const STATUS = ["未组队", "尚未", "待组", "缺", "补"];
+    const STATUS = ["未组队", "尚未", "待组", "缺", "差", "补"];
 
     window.onload = function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -58,141 +80,123 @@
         if(d) {
             try {
                 const json = JSON.parse(decodeURIComponent(atob(d)));
-                ms = json.ms || []; fixedTs = json.fs || [];
+                ms = json.ms || []; fixedTs = json.fs || []; unit = json.u || "万";
                 render(); return;
-            } catch(e) { console.error("URL解析失败", e); }
+            } catch(e) {}
         }
-        var lm = localStorage.getItem('team_ms'); var lf = localStorage.getItem('team_fs');
-        if(lm) ms = JSON.parse(lm); if(lf) fixedTs = JSON.parse(lf);
+        ms = JSON.parse(localStorage.getItem('t_ms') || '[]');
+        fixedTs = JSON.parse(localStorage.getItem('t_fs') || '[]');
+        unit = localStorage.getItem('t_u') || '万';
         render();
     }
 
     function smartImport() {
-        var text = document.getElementById('importBox').value;
+        const text = document.getElementById('importBox').value;
         if(!text.trim()) return;
-        var lines = text.split('\n');
-        var tempMs = []; var tempFs = []; var allFixed = new Set();
-
+        unit = text.includes("亿") ? "亿" : "万";
+        const lines = text.split('\n');
+        let tMs = [], tFs = [], allF = new Set();
         lines.forEach(line => {
-            var row = line.trim();
+            const row = line.trim();
             if(!/^\d+\./.test(row)) return;
-            var blocks = row.replace(/^\d+\.\s*/, '').split(/\s+/).filter(b => b.length > 0);
-            var isUnf = STATUS.some(s => row.includes(s));
-
-            if (!isUnf && blocks.length >= 4) {
-                var names = blocks.slice(0, 4);
-                tempFs.push(names.join(' 、 '));
-                names.forEach(n => allFixed.add(n));
+            const content = row.replace(/^\d+\.\s*/, '');
+            const blocks = content.split(/\s+/).filter(b => b.length > 0);
+            if (!STATUS.some(s => row.includes(s)) && blocks.length >= 4) {
+                const names = blocks.slice(0, 4);
+                tFs.push(names.join(' 、 '));
+                names.forEach(n => allF.add(n));
             } else if (blocks.length > 0) {
-                var name = blocks[0];
-                if(!allFixed.has(name)) {
-                    var job = "未知";
-                    JOBS.forEach(j => { if(row.indexOf(j) > -1) job = j; });
-                    var pMatch = row.match(/(\d+\.?\d*)/g);
-                    var pVal = pMatch ? parseFloat(pMatch[pMatch.length - 1]) : 0;
-                    if(!tempMs.some(m => m.n === name)) {
-                        tempMs.push({n: name, j: job, p: pVal, pre: []});
-                    }
+                const name = blocks[0];
+                if(!allF.has(name)) {
+                    let job = "未知";
+                    JOBS.forEach(j => { if(row.includes(j)) job = j; });
+                    const pMatch = row.match(/(\d+\.?\d*)/g);
+                    const pVal = pMatch ? parseFloat(pMatch[pMatch.length - 1]) : 0;
+                    if(!tMs.some(m => m.n === name)) tMs.push({n: name, j: job, p: pVal, pre: []});
                 }
             }
         });
-        ms = tempMs.filter(m => !allFixed.has(m.n));
-        fixedTs = tempFs;
+        ms = tMs.filter(m => !allF.has(m.n)); fixedTs = tFs;
         save(); render();
         document.getElementById('importBox').value = "";
     }
 
     function render() {
-        var box = document.getElementById('list');
-        if(ms.length === 0) { box.innerHTML = '请在上方粘贴内容并解析'; return; }
-        var h = "";
-        ms.forEach((m, i) => {
-            h += `<div class="member-item">
-                <div class="m-header"><span class="m-name">${m.n} <small style="color:#888">(${m.j} | ${m.p}万)</small></span></div>
-                <div class="tag-grid">`;
-            ms.forEach((t, k) => {
-                if(i!==k) {
-                    var act = m.pre.indexOf(t.n) > -1;
-                    h += `<div class="tag ${act?'active':''}" onclick="sel(${i},'${t.n}')"><b>${t.n}</b><span>${t.p}万</span></div>`;
-                }
-            });
-            h += `</div></div>`;
-        });
-        box.innerHTML = h;
+        const box = document.getElementById('list');
+        if(!ms.length) { box.innerHTML = '请导入数据'; return; }
+        box.innerHTML = ms.map((m, i) => `
+            <div class="member-card">
+                <div class="m-info">
+                    <span class="m-title">${m.n}<span class="m-tag">${m.j}</span><span class="m-tag">${m.p}${unit}</span></span>
+                </div>
+                <div class="tag-grid">
+                    ${ms.map((t, k) => i===k ? '' : `
+                        <div class="tag ${m.pre.includes(t.n)?'active':''}" onclick="sel(${i},'${t.n}')">
+                            <b>${t.n}</b><span>${t.p}${unit}</span>
+                        </div>`).join('')}
+                </div>
+            </div>`).join('');
     }
 
     function sel(idx, name) {
-        var m = ms[idx], p = m.pre.indexOf(name);
-        if(p>-1) m.pre.splice(p,1); else { if(m.pre.length>=3) return alert("限选3人"); m.pre.push(name); }
+        const m = ms[idx], p = m.pre.indexOf(name);
+        if(p > -1) m.pre.splice(p, 1);
+        else { if(m.pre.length >= 3) return alert("限选3人"); m.pre.push(name); }
         save(); render();
     }
 
-    function save() { localStorage.setItem('team_ms', JSON.stringify(ms)); localStorage.setItem('team_fs', JSON.stringify(fixedTs)); }
-
-    function copyShareLink() {
-        const data = btoa(encodeURIComponent(JSON.stringify({ms:ms, fs:fixedTs})));
-        const url = window.location.origin + window.location.pathname + "?d=" + data;
-        const el = document.createElement('textarea');
-        el.value = url;
-        document.body.appendChild(el);
-        el.select();
-        try {
-            document.execCommand('copy');
-            alert("链接复制成功！");
-        } catch (err) {
-            alert("点击确定后请长按复制链接：\n" + url);
-        }
-        document.body.removeChild(el);
+    function save() { 
+        localStorage.setItem('t_ms', JSON.stringify(ms)); 
+        localStorage.setItem('t_fs', JSON.stringify(fixedTs)); 
+        localStorage.setItem('t_u', unit);
     }
 
-    function clearAll() { if(confirm("确定清空数据？")) { localStorage.clear(); location.href = window.location.origin + window.location.pathname; } }
+    function openShareModal() {
+        const data = btoa(encodeURIComponent(JSON.stringify({ms, fs:fixedTs, u:unit})));
+        const url = window.location.origin + window.location.pathname + "?d=" + data;
+        document.getElementById('shareLinkArea').value = url;
+        document.getElementById('shareModal').style.display = 'flex';
+    }
+
+    function selectAllAndCopy() {
+        const area = document.getElementById('shareLinkArea');
+        area.select();
+        area.setSelectionRange(0, 99999); 
+        document.execCommand('copy');
+        alert("已全选并尝试复制！如果提示失败，请长按文本框手动全选复制。");
+    }
+
+    function clearAll() { if(confirm("重置数据？")) { localStorage.clear(); location.reload(); } }
 
     function match() {
-        var results = [];
-        var used = new Set();
-        var pool = JSON.sort ? JSON.parse(JSON.stringify(ms)) : [...ms];
-        pool.sort((a, b) => b.p - a.p); // 战力高到底排队
-
-        var h = "<h3>组队方案结果</h3>";
-        fixedTs.forEach((t, i) => h += `<div class="res-item fixed-team"><b>已成组 ${i+1}：</b><br>${t}</div>`);
-
-        // 术士优先分配逻辑
-        var shushi = pool.filter(p => p.j === "术士");
-        var others = pool.filter(p => p.j !== "术士");
+        let used = new Set(), results = [];
+        let pool = [...ms].sort((a,b) => b.p - a.p);
+        let shushi = pool.filter(p => p.j === "术士");
 
         while (used.size < pool.length) {
-            var team = [];
-            // 1. 尝试本组先分配一个术士
-            var ss = shushi.find(s => !used.has(s.n));
-            if (ss) { team.push(ss); used.add(ss.n); }
-            
-            // 2. 如果这组没人，从其他人里挑战力最高的当队长
-            if (team.length === 0) {
-                var leader = others.find(o => !used.has(o.n));
-                if (!leader) break;
-                team.push(leader); used.add(leader.n);
+            let team = [];
+            let ss = shushi.find(s => !used.has(s.n));
+            if(ss) { team.push(ss); used.add(ss.n); }
+            if(!team.length) {
+                let lead = pool.find(p => !used.has(p.n));
+                if(!lead) break; team.push(lead); used.add(lead.n);
             }
-
-            // 3. 找战力最相近的人补齐
             while (team.length < 4) {
-                var target = team[team.length - 1];
-                var candidates = pool.filter(p => !used.has(p.n));
-                if (candidates.length === 0) break;
-
-                // 找战力差绝对值最小的人
-                candidates.sort((a, b) => Math.abs(a.p - target.p) - Math.abs(b.p - target.p));
-                var best = candidates[0];
-                team.push(best); used.add(best.n);
+                let target = team[team.length-1];
+                let cans = pool.filter(p => !used.has(p.n));
+                if(!cans.length) break;
+                cans.sort((a,b) => Math.abs(a.p - target.p) - Math.abs(b.p - target.p));
+                team.push(cans[0]); used.add(cans[0].n);
             }
             results.push(team);
         }
 
+        let h = `<h3>分配结果方案</h3>`;
+        fixedTs.forEach((t, i) => h += `<div class="res-item type-fixed"><b>接龙已成组 ${i+1}</b><br>${t}</div>`);
         results.forEach((t, i) => {
-            var str = t.map(m => `${m.n}(${m.j},${m.p}万)`).join(' 、 ');
-            var hasSS = t.some(m => m.j === "术士") ? "✅含术士" : "❌无术士";
-            h += `<div class="res-item"><b>撮合队伍 ${i+1} [${hasSS}]：</b><br>${str}</div>`;
+            const hasSS = t.some(m => m.j==="术士") ? " [✅含术士]" : " [❌无术士]";
+            h += `<div class="res-item type-match"><b>系统撮合组 ${i+1}${hasSS}</b><br>${t.map(m => `${m.n}(${m.p}${unit})`).join(' 、 ')}</div>`;
         });
-
         document.getElementById('res').innerHTML = h;
         document.getElementById('res').scrollIntoView();
     }
