@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手-阵容平衡版</title>
+    <title>组队助手-阵容优先版</title>
     <style>
         :root { 
             --p: #07c160; --bg: #f5f7fa; --card: #ffffff; --text: #333; 
@@ -23,9 +23,8 @@
         .job-术士 { color: var(--blue) !important; font-weight: 600 !important; }
         .job-贤者 { color: var(--p) !important; }
         .job-斗士 { color: var(--darkred) !important; }
-        .highlight-red { color: var(--red) !important; }
+        .highlight-red { color: var(--red) !important; font-weight: 500; }
         
-        /* 侧边双向导航 UI 优化 */
         .side-nav {
             position: fixed; right: 15px; top: 50%; transform: translateY(-50%);
             display: flex; flex-direction: column; gap: 15px; z-index: 999;
@@ -39,46 +38,17 @@
         }
         .nav-btn:active { background: #fff; transform: scale(0.9); }
         .nav-icon { width: 24px; height: 24px; stroke: currentColor; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-
-        .del-btn {
-            background: #ffeef0; color: var(--red); border: 1px solid #ffccc7;
-            padding: 5px 12px; border-radius: 6px; font-size: 14px; font-weight: 500;
-            cursor: pointer; margin-left: 15px;
-        }
-        #toast {
-            position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.85); color: #fff; padding: 12px 24px;
-            border-radius: 10px; z-index: 9999; display: none; font-size: 15px;
-            text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); pointer-events: none;
-        }
-        #modalOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 10000;
-        }
-        .modal-box {
-            background: #fff; width: 85%; max-width: 400px; border-radius: 15px; padding: 20px; text-align: center;
-        }
-        .share-url-box {
-            width: 100%; padding: 10px; background: #f0f0f0; border: 1px solid #ddd;
-            border-radius: 8px; font-size: 14px; word-break: break-all; margin: 15px 0;
-            min-height: 50px; display: block; box-sizing: border-box; color: #333;
-        }
-        
-        textarea, input, select { 
-            width: 100%; padding: 12px; border: 1px solid #efefef; 
-            border-radius: 8px; background: #fafafa; outline: none; 
-            box-sizing: border-box; font-size: 15px; margin-bottom: 10px; 
-        }
-        .btn { 
-            width: 100%; border: none; border-radius: 10px; padding: 14px; 
-            font-size: 16px; font-weight: 600; cursor: pointer; color: #fff; 
-            margin-bottom: 10px; display: block; text-align: center;
-        }
+        .del-btn { background: #ffeef0; color: var(--red); border: 1px solid #ffccc7; padding: 5px 12px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; margin-left: 15px; }
+        #toast { position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.85); color: #fff; padding: 12px 24px; border-radius: 10px; z-index: 9999; display: none; font-size: 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); pointer-events: none; }
+        #modalOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 10000; }
+        .modal-box { background: #fff; width: 85%; max-width: 400px; border-radius: 15px; padding: 20px; text-align: center; }
+        .share-url-box { width: 100%; padding: 10px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; word-break: break-all; margin: 15px 0; min-height: 80px; display: block; box-sizing: border-box; color: #555; }
+        textarea, input, select { width: 100%; padding: 12px; border: 1px solid #efefef; border-radius: 8px; background: #fafafa; outline: none; box-sizing: border-box; font-size: 15px; margin-bottom: 10px; }
+        .btn { width: 100%; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 600; cursor: pointer; color: #fff; margin-bottom: 10px; display: block; text-align: center; }
         .btn-green { background: var(--p); }
         .btn-blue { background: var(--blue); }
         .btn-red { background: var(--red); }
         .btn-orange { background: var(--orange); }
-
         .tag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .tag-box { border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px 5px; text-align: center; background: #fff; cursor: pointer; }
         .tag-box.active { border-color: var(--p); background: #f0f9f4; box-shadow: 0 0 0 2px var(--p); }
@@ -86,7 +56,7 @@
         .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
         .res-person { background: #fff; padding: 12px 4px; border-radius: 8px; border: 1px solid #eee; text-align: center; }
         .res-person b { font-size: 19px; color: #000; font-weight: 700; display: block; margin-bottom: 4px; }
-        .res-person span { font-size: 14px; font-weight: 400 !important; }
+        .res-person span { font-size: 14px; font-weight: 400; }
     </style>
 </head>
 <body>
@@ -94,20 +64,15 @@
 <div id="toast"></div>
 
 <div class="side-nav">
-    <button class="nav-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="去顶部">
-        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
-    </button>
-    <button class="nav-btn" onclick="window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'})" title="去底部">
-        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-    </button>
+    <button class="nav-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg></button>
+    <button class="nav-btn" onclick="window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'})"><svg class="nav-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
 </div>
 
 <div id="modalOverlay">
     <div class="modal-box">
-        <h3 style="justify-content: center;">分享页面链接</h3>
-        <p style="font-size: 13px; color: #666; margin-bottom: 10px;">点击按钮复制链接，或长按灰色框手动复制：</p>
+        <h3 style="justify-content: center;">协作分享链接</h3>
         <textarea id="shareUrl" class="share-url-box" readonly></textarea>
-        <button class="btn btn-green" onclick="copyUrl()">一键复制链接</button>
+        <button class="btn btn-green" onclick="copyUrl()">一键复制接力链接</button>
         <button class="btn btn-red" style="margin-bottom:0" onclick="closeModal()">关闭</button>
     </div>
 </div>
@@ -125,18 +90,20 @@
         <button class="btn btn-orange" style="margin-bottom:0" onclick="addManual()">确认加入名单</button>
     </div>
     <div style="display:flex; gap:10px; margin-top:10px;">
-        <button class="btn btn-blue" style="flex:1; margin-bottom:0" onclick="openShareModal()">分享页面</button>
+        <button class="btn btn-blue" style="flex:1; margin-bottom:0" onclick="openShareModal()">分享接力页面</button>
         <button class="btn btn-red" style="flex:1; margin-bottom:0" onclick="clearAll()">重置数据</button>
     </div>
 </div>
 
-<div class="card"><h3>2. 待匹配意向 (点击名字选择)</h3><div id="list"></div></div>
-<button class="btn btn-blue" style="font-size: 18px; padding: 18px; font-weight:600; border-radius:12px;" onclick="match()">生成方案 (5%阈值+阵容冲突规避)</button>
+<div class="card"><h3>2. 待匹配意向</h3><div id="list"></div></div>
+<button class="btn btn-blue" style="font-size: 18px; padding: 18px; font-weight:600; border-radius:12px;" onclick="match()">生成方案</button>
 <div id="res"></div>
 
 <script>
     let ms = [], fixedTs = [], unit = "万";
-    const JOBS = ["术士", "贤者", "骑士", "斗士"];
+    const JOBS_PRIORITY = ["术士", "贤者", "骑士", "斗士"];
+    const JOB_MAP = { "术士": 0, "贤者": 1, "骑士": 2, "斗士": 3 };
+    const REV_MAP = ["术士", "贤者", "骑士", "斗士"];
     const STATUS = ["未组队", "尚未", "待组", "缺", "差", "补"];
 
     function showMsg(text, type = 'info') {
@@ -148,31 +115,43 @@
     }
 
     function openShareModal() {
-        document.getElementById('shareUrl').value = window.location.href;
+        const compressedMs = ms.map(m => ({ n: m.n, j: JOB_MAP[m.j] ?? 9, p: m.p, r: m.pre }));
+        const data = { m: compressedMs, f: fixedTs.map(t => t.map(p => ({ n: p.n, j: JOB_MAP[p.j] ?? 9 }))), u: unit === "亿" ? 1 : 0 };
+        const encoded = btoa(encodeURIComponent(JSON.stringify(data)));
+        const url = window.location.origin + window.location.pathname + "?d=" + encoded;
+        document.getElementById('shareUrl').value = url;
         document.getElementById('modalOverlay').style.display = 'flex';
     }
+
     function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
     function copyUrl() {
-        const u = document.getElementById('shareUrl');
-        u.select(); u.setSelectionRange(0, 99999);
-        try {
-            document.execCommand('copy');
-            showMsg("已成功复制链接");
-        } catch (e) {
-            showMsg("复制失败，请手动长按复制", "err");
-        }
+        const u = document.getElementById('shareUrl'); u.select(); u.setSelectionRange(0, 99999);
+        document.execCommand('copy'); showMsg("链接已复制");
     }
 
     window.onload = function() {
+        const d = new URLSearchParams(window.location.search).get('d');
+        if (d) {
+            try {
+                const raw = JSON.parse(decodeURIComponent(atob(d)));
+                ms = (raw.m || []).map(m => ({ n: m.n, j: REV_MAP[m.j] || "未知", p: m.p, pre: m.r || [] }));
+                fixedTs = (raw.f || []).map(t => t.map(p => ({ n: p.n, j: REV_MAP[p.j] || "未知" })));
+                unit = raw.u === 1 ? "亿" : "万";
+                save(); window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (e) { loadFromLocal(); }
+        } else { loadFromLocal(); }
+        render();
+    }
+
+    function loadFromLocal() {
         ms = JSON.parse(localStorage.getItem('tm_ms') || '[]');
         fixedTs = JSON.parse(localStorage.getItem('tm_fs') || '[]');
         unit = localStorage.getItem('tm_u') || '万';
-        render();
     }
 
     function smartImport() {
         const text = document.getElementById('importBox').value;
-        if(!text.trim()) { showMsg("请输入内容", "err"); return; }
+        if(!text.trim()) return;
         unit = text.includes("亿") ? "亿" : "万";
         const lines = text.split('\n');
         let tM = [], tF = [], allF = new Set();
@@ -184,8 +163,7 @@
                 const names = blocks.slice(0, 4);
                 let teamMembers = names.map(n => {
                     let job = "未知";
-                    if(row.includes("术士")) job="术士"; else if(row.includes("贤者")) job="贤者";
-                    else if(row.includes("骑士")) job="骑士"; else if(row.includes("斗士")) job="斗士";
+                    JOBS_PRIORITY.forEach(j => { if(row.includes(j)) job = j; });
                     return { n, j: job };
                 });
                 tF.push(teamMembers);
@@ -194,24 +172,22 @@
                 const name = blocks[0];
                 if(!allF.has(name)) {
                     let job = "未知";
-                    JOBS.forEach(j => { if(row.includes(j)) job = j; });
+                    JOBS_PRIORITY.forEach(j => { if(row.includes(j)) job = j; });
                     const pMatch = row.match(/(\d+\.?\d*)/g);
                     const pVal = pMatch ? parseFloat(pMatch[pMatch.length - 1]) : 0;
                     if(!tM.some(m => m.n === name)) tM.push({n: name, j: job, p: pVal, pre: []});
                 }
             }
         });
-        ms = tM; fixedTs = tF;
-        save(); render(); showMsg("导入完成");
+        ms = tM; fixedTs = tF; save(); render(); showMsg("导入完成");
     }
 
     function addManual() {
         const nI = document.getElementById('m_name'), pI = document.getElementById('m_power');
         const name = nI.value.trim(), job = document.getElementById('m_job').value, power = parseFloat(pI.value);
-        if(!name || isNaN(power)) { showMsg("信息不全", "err"); return; }
+        if(!name || isNaN(power)) return;
         ms.push({ n: name, j: job, p: power, pre: [] });
-        save(); render(); showMsg(name + " 已加入");
-        nI.value = ""; pI.value = "";
+        save(); render(); nI.value = ""; pI.value = "";
     }
 
     function render() {
@@ -221,19 +197,15 @@
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <span class="m-name-title">${m.n}</span>
                     <div style="display:flex; align-items:center;">
-                        <div class="job-label">
-                            <span class="job-${m.j}">${m.j}</span> | <span class="highlight-red power-label">${m.p}${unit}</span>
-                        </div>
-                        <button class="del-btn" onclick="ms.splice(${i},1);save();render();showMsg('已移除')">移除</button>
+                        <div class="job-label"><span class="job-${m.j}">${m.j}</span> | <span class="highlight-red">${m.p}${unit}</span></div>
+                        <button class="del-btn" onclick="ms.splice(${i},1);save();render();">移除</button>
                     </div>
                 </div>
                 <div class="tag-grid">
                     ${ms.map((t, k) => i===k ? '' : `
                         <div class="tag-box ${m.pre.includes(t.n)?'active':''}" onclick="sel(${i},'${t.n}')">
                             <span class="tag-name">${t.n}</span>
-                            <span class="job-label">
-                                <span class="job-${t.j}">${t.j}</span> | <span class="highlight-red power-label">${t.p}${unit}</span>
-                            </span>
+                            <span class="job-label"><span class="job-${t.j}">${t.j}</span> | <span class="highlight-red">${t.p}${unit}</span></span>
                         </div>`).join('')}
                 </div>
             </div>`).join('');
@@ -245,19 +217,48 @@
         save(); render();
     }
 
-    function save() { 
-        localStorage.setItem('tm_ms', JSON.stringify(ms)); 
-        localStorage.setItem('tm_fs', JSON.stringify(fixedTs)); 
-        localStorage.setItem('tm_u', unit);
-    }
-
-    function clearAll() { if(confirm("重置数据？")) { localStorage.clear(); location.reload(); } }
+    function save() { localStorage.setItem('tm_ms', JSON.stringify(ms)); localStorage.setItem('tm_fs', JSON.stringify(fixedTs)); localStorage.setItem('tm_u', unit); }
+    function clearAll() { if(confirm("重置所有数据？")) { localStorage.clear(); location.reload(); } }
 
     function match() {
-        if(ms.length === 0 && fixedTs.length === 0) { showMsg("名单为空", "err"); return; }
+        if(ms.length === 0 && fixedTs.length === 0) return;
         let used = new Set(), results = [];
         let pool = [...ms].sort((a,b) => b.p - a.p);
-        const getJobCount = (team, job) => team.filter(m => m.j === job).length;
+        
+        const canAddJob = (team, job) => {
+            const count = team.filter(m => m.j === job).length;
+            if (job === "贤者" || job === "骑士") return count < 1;
+            if (job === "术士" || job === "斗士") return count < 2;
+            return true;
+        };
+
+        // 核心改动：基于队伍最低战力的 5% 冗余逻辑
+        const findBestPartner = (team, leftList) => {
+            if (leftList.length === 0) return null;
+            // 获取当前队伍中的最低战力
+            const minPowerInTeam = Math.min(...team.map(m => m.p));
+            const threshold = minPowerInTeam * 0.95;
+
+            // 1. 尝试按【优先级顺序】寻找符合【动态阈值】的队友
+            for (let jobName of JOBS_PRIORITY) {
+                if (!canAddJob(team, jobName)) continue;
+                // 在剩余名单里找，只要比队内最低者低不到 5% 且符合职业
+                let partner = leftList.find(x => x.j === jobName && x.p >= threshold);
+                if (partner) return partner;
+            }
+
+            // 2. 如果 5% 范围内没找到完美阵容，降级：寻找符合职业要求的最高战力者（阵容冲突规避）
+            for (let jobName of JOBS_PRIORITY) {
+                if (!canAddJob(team, jobName)) continue;
+                let partner = leftList.find(x => x.j === jobName);
+                if (partner) return partner;
+            }
+
+            // 3. 实在没有符合名额的职业了，被迫拿剩余池里战力最高的（保底逻辑）
+            return leftList[0]; 
+        };
+
+        // --- 1. 处理意向匹配 ---
         pool.forEach(m => {
             if (used.has(m.n)) return;
             if (m.pre.length > 0) {
@@ -265,54 +266,36 @@
                 m.pre.forEach(fn => {
                     if (team.length < 4 && !used.has(fn)) {
                         let f = pool.find(p => p.n === fn);
-                        if (f && getJobCount(team, f.j) < 2) { team.push(f); used.add(fn); }
+                        if (f && canAddJob(team, f.j)) { team.push(f); used.add(fn); }
                     }
                 });
                 while (team.length < 4) {
                     let left = pool.filter(p => !used.has(p.n));
                     if (left.length === 0) break;
-                    let p = left.find(x => getJobCount(team, x.j) < 2) || left[0];
+                    let p = findBestPartner(team, left);
                     team.push(p); used.add(p.n);
                 }
                 results.push(team);
             }
         });
+
+        // --- 2. 处理常规匹配 ---
         while (true) {
             let left = pool.filter(p => !used.has(p.n));
             if (left.length === 0) break;
-            let team = [];
-            let leader = left[0];
-            team.push(leader);
-            used.add(leader.n);
+            let team = []; let leader = left[0];
+            team.push(leader); used.add(leader.n);
+            
             while(team.length < 4) {
                 let currentLeft = pool.filter(p => !used.has(p.n));
                 if(currentLeft.length === 0) break;
-                let partner = null;
-                let searchRange = currentLeft.slice(0, 10); 
-                for(let p of searchRange) {
-                    if(getJobCount(team, p.j) >= 2) continue;
-                    if(getJobCount(team, "术士") === 2 && p.j === "斗士" && getJobCount(team, "斗士") === 1) continue;
-                    if(getJobCount(team, "斗士") === 2 && p.j === "术士" && getJobCount(team, "术士") === 1) continue;
-                    if(p.j === "术士") {
-                        let currentMin = Math.min(...team.map(m => m.p));
-                        if(team.length === 3 && p.p < currentMin * 0.95) continue; 
-                        if(p.p < currentMin && getJobCount(team, "术士") >= 1) continue; 
-                    }
-                    partner = p;
-                    break;
-                }
-                if(!partner) {
-                    partner = currentLeft.find(x => {
-                        if(getJobCount(team, "术士") === 2) return x.j !== "斗士" && getJobCount(team, x.j) < 2;
-                        if(getJobCount(team, "斗士") === 2) return x.j !== "术士" && getJobCount(team, x.j) < 2;
-                        return getJobCount(team, x.j) < 2;
-                    }) || currentLeft[0];
-                }
-                team.push(partner);
-                used.add(partner.n);
+                let partner = findBestPartner(team, currentLeft);
+                team.push(partner); used.add(partner.n);
             }
             results.push(team);
         }
+
+        // --- 3. 渲染结果 ---
         let h = `<h3>匹配方案结果</h3>`;
         fixedTs.forEach((team, i) => {
             h += `<div class="card" style="background:#f0f7ff; border-left:5px solid var(--blue);"><b>锁定队 ${i+1}</b><div class="res-grid">`;
@@ -321,9 +304,7 @@
         });
         results.forEach((t, i) => {
             h += `<div class="card" style="background:#f6fbf8; border-left:5px solid var(--p);"><b>匹配组 ${i+1}</b><div class="res-grid">`;
-            t.forEach(m => {
-                h += `<div class="res-person"><b>${m.n}</b><span><span class="job-${m.j}">${m.j}</span> | <span class="highlight-red">${m.p}${unit}</span></span></div>`;
-            });
+            t.forEach(m => { h += `<div class="res-person"><b>${m.n}</b><span><span class="job-${m.j}">${m.j}</span> | <span class="highlight-red">${m.p}${unit}</span></span></div>`; });
             h += `</div></div>`;
         });
         document.getElementById('res').innerHTML = h;
