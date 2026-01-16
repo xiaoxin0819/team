@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手-全能录入版</title>
+    <title>组队助手-功能完备版</title>
     <style>
         :root { --p: #07c160; --bg: #f8f9fa; --card: #ffffff; --text: #444; --blue: #007aff; --red: #ee0a24; --gold: #FFD700; }
         body { font-family: "Heiti SC", "STHeiti", "SimHei", "Microsoft YaHei", sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); font-weight: 300; }
@@ -12,11 +12,10 @@
         h3 { margin: 0 0 15px 0; font-size: 15px; font-weight: 400; color: #1a1a1a; display: flex; align-items: center; }
         h3::before { content: ""; width: 3px; height: 14px; background: var(--p); border-radius: 2px; margin-right: 8px; }
         
-        textarea, input, select { width: 100%; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; outline: none; box-sizing: border-box; font-size: 13px; font-weight: 300; margin-bottom: 10px; transition: border 0.3s; }
-        textarea:focus, input:focus, select:focus { border-color: var(--p); }
+        textarea, input, select { width: 100%; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; outline: none; box-sizing: border-box; font-size: 13px; font-weight: 300; margin-bottom: 10px; }
 
-        /* 按钮样式 */
-        .btn { width: 100%; border: none; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: 300; cursor: pointer; color: #fff; margin-bottom: 10px; display: block; }
+        /* 按钮体系 */
+        .btn { width: 100%; border: none; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: 300; cursor: pointer; color: #fff; margin-bottom: 10px; display: block; text-align: center; text-decoration: none; }
         .btn-green { background: var(--p); }
         .btn-blue { background: var(--blue); }
         .btn-red { background: var(--red); }
@@ -24,29 +23,33 @@
         .btn-half { flex: 1; }
         .btn-sm { padding: 8px; font-size: 12px; margin-bottom: 0; }
 
-        /* 手动输入区样式 */
+        /* 手动输入模块 */
         .manual-box { background: #fdfdfd; border: 1px dashed #ddd; padding: 12px; border-radius: 10px; margin-top: 10px; }
-        .input-label { font-size: 12px; color: #888; margin-bottom: 4px; display: block; }
+        .input-label { font-size: 11px; color: #999; margin-bottom: 3px; display: block; }
 
         /* 分享弹窗 */
         #shareModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #fff; width: 80%; padding: 20px; border-radius: 12px; text-align: center; }
         #shareLinkArea { width: 100%; height: 60px; font-size: 11px; background: #f5f5f5; border: 1px solid #ddd; padding: 8px; border-radius: 4px; margin: 10px 0; color: #777; }
 
-        /* 名单与样式 */
-        .member-card { border-bottom: 1px solid #f2f2f2; padding: 12px 0; }
-        .m-header { margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        /* 成员卡片与删除按钮 */
+        .member-card { border-bottom: 1px solid #f2f2f2; padding: 15px 0; position: relative; }
+        .m-header { margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; padding-right: 45px; }
+        .btn-del { position: absolute; right: 0; top: 12px; color: var(--red); font-size: 12px; border: 1px solid var(--red); padding: 2px 6px; border-radius: 4px; cursor: pointer; }
+        
+        /* 核心定制样式 */
         .c-name { font-weight: bold; color: #000; font-size: 15px; }
         .c-power { color: var(--red); font-weight: 400; }
-        .c-job { color: var(--gold); font-weight: bold; font-size: 11px; text-shadow: 0 0 1px rgba(0,0,0,0.1); }
+        .c-job { color: var(--gold); font-weight: bold; font-size: 11px; }
         
         .tag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .tag { padding: 10px 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; text-align: center; cursor: pointer; }
+        .tag { padding: 10px 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; text-align: center; cursor: pointer; transition: 0.2s; }
         .tag .t-n { display: block; font-weight: bold; color: #000; font-size: 14px; margin-bottom: 2px; }
+        
         .tag.active { background: #f0f9f4; border-color: var(--p); }
         .tag.active .t-n { color: var(--p); }
 
-        /* 匹配结果 */
+        /* 结果展示 */
         .res-item { padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 13px; line-height: 1.6; }
         .type-fixed { background: #f0f6ff; border-left: 3px solid var(--blue); }
         .type-match { background: #f4faf6; border-left: 3px solid var(--p); }
@@ -59,22 +62,22 @@
 
 <div id="shareModal">
     <div class="modal-content">
-        <h3>获取分享链接</h3>
+        <h3>分享链接</h3>
         <textarea id="shareLinkArea" readonly></textarea>
-        <button class="btn btn-green" onclick="selectAllCopy()">一键全选复制</button>
-        <button class="btn btn-red" style="margin:0" onclick="document.getElementById('shareModal').style.display='none'">关闭</button>
+        <button class="btn btn-green" onclick="selectAllCopy()">复制链接</button>
+        <button class="btn btn-red" style="margin:0" onclick="document.getElementById('shareModal').style.display='none'">返回</button>
     </div>
 </div>
 
 <div class="card">
-    <h3>1. 导入数据</h3>
-    <textarea id="importBox" placeholder="粘贴接龙文本自动解析..."></textarea>
-    <button class="btn btn-green" onclick="smartImport()">智能解析名单</button>
+    <h3>1. 录入数据</h3>
+    <textarea id="importBox" placeholder="粘贴微信接龙文本..."></textarea>
+    <button class="btn btn-green" onclick="smartImport()">智能解析接龙</button>
     
     <div class="manual-box">
-        <div style="font-size:13px; margin-bottom:10px; color:#555;">➕ 手动添加成员</div>
+        <div style="font-size:12px; margin-bottom:8px; color:#666;">手动添加单人：</div>
         <span class="input-label">昵称</span>
-        <input type="text" id="m_name" placeholder="例如：笨蛋xx">
+        <input type="text" id="m_name" placeholder="输入昵称">
         <span class="input-label">职业</span>
         <select id="m_job">
             <option value="术士">术士</option>
@@ -82,23 +85,23 @@
             <option value="骑士">骑士</option>
             <option value="斗士">斗士</option>
         </select>
-        <span class="input-label">战力 (当前单位:${unit})</span>
-        <input type="number" id="m_power" placeholder="例如：2.5">
-        <button class="btn btn-blue btn-sm" onclick="addManual()">确认添加人员</button>
+        <span class="input-label">战力 (数值)</span>
+        <input type="number" id="m_power" placeholder="输入数字">
+        <button class="btn btn-blue btn-sm" onclick="addManual()">确认加入名单</button>
     </div>
 
     <div class="btn-group" style="margin-top:15px;">
         <button class="btn btn-blue btn-half" onclick="openShare()">分享勾选页面</button>
-        <button class="btn btn-red btn-half" onclick="clearAll()">清空重置数据</button>
+        <button class="btn btn-red btn-half" onclick="clearAll()">全部清空重置</button>
     </div>
 </div>
 
 <div class="card">
     <h3>2. 待匹配意向</h3>
-    <div id="list" style="color:#bbb; text-align:center; padding:15px 0;">等待数据导入...</div>
+    <div id="list" style="color:#bbb; text-align:center; padding:15px 0;">等待录入...</div>
 </div>
 
-<button class="btn btn-blue" style="font-size: 16px; padding: 15px; border-radius:12px;" onclick="match()">开始撮合匹配方案</button>
+<button class="btn btn-blue" style="font-size: 16px; padding: 15px; border-radius:12px; margin-top:10px;" onclick="match()">生成最终撮合方案</button>
 <div id="res"></div>
 
 <script>
@@ -121,7 +124,6 @@
         render();
     }
 
-    // 智能解析逻辑
     function smartImport() {
         const text = document.getElementById('importBox').value;
         if(!text.trim()) return;
@@ -152,33 +154,36 @@
         document.getElementById('importBox').value = "";
     }
 
-    // 手动添加逻辑
     function addManual() {
         const name = document.getElementById('m_name').value.trim();
         const job = document.getElementById('m_job').value;
         const power = parseFloat(document.getElementById('m_power').value);
-
-        if(!name || isNaN(power)) return alert("请完整填写昵称和战力");
-        if(ms.some(m => m.n === name)) return alert("昵称已存在");
-
+        if(!name || isNaN(power)) return alert("必填昵称和战力");
         ms.push({ n: name, j: job, p: power, pre: [] });
         save(); render();
-
-        // 重置表单
         document.getElementById('m_name').value = "";
         document.getElementById('m_power').value = "";
-        alert("添加成功！");
+    }
+
+    // 删除单人功能
+    function removeOne(idx) {
+        if(confirm(`确定移除成员 ${ms[idx].n} 吗？`)) {
+            ms.splice(idx, 1);
+            save();
+            render();
+        }
     }
 
     function render() {
         const box = document.getElementById('list');
-        if(!ms.length) { box.innerHTML = '暂无待匹配数据'; return; }
+        if(!ms.length) { box.innerHTML = '暂无数据'; return; }
         box.innerHTML = ms.map((m, i) => `
             <div class="member-card">
                 <div class="m-header">
                     <span class="c-name">${m.n}</span>
                     <span style="font-size:11px"><span class="c-job">${m.j}</span> | <span class="c-power">${m.p}${unit}</span></span>
                 </div>
+                <div class="btn-del" onclick="removeOne(${i})">移除</div>
                 <div class="tag-grid">
                     ${ms.map((t, k) => i===k ? '' : `
                         <div class="tag ${m.pre.includes(t.n)?'active':''}" onclick="sel(${i},'${t.n}')">
@@ -213,10 +218,10 @@
         const area = document.getElementById('shareLinkArea');
         area.select();
         document.execCommand('copy');
-        alert("链接已选中复制，去发给群友吧！");
+        alert("已选中复制！");
     }
 
-    function clearAll() { if(confirm("确定清空所有数据？")) { localStorage.clear(); location.reload(); } }
+    function clearAll() { if(confirm("清空全部名单？")) { localStorage.clear(); location.reload(); } }
 
     function match() {
         let used = new Set(), results = [];
@@ -242,10 +247,10 @@
         }
 
         let h = `<h3>匹配方案结果</h3>`;
-        fixedTs.forEach((t, i) => h += `<div class="res-item type-fixed"><b>固定组 ${i+1}</b><br>${t}</div>`);
+        fixedTs.forEach((t, i) => h += `<div class="res-item type-fixed"><b>已成组 ${i+1}</b><br>${t}</div>`);
         results.forEach((t, i) => {
             const hasSS = t.some(m => m.j==="术士") ? " (含术士)" : " (缺术士)";
-            h += `<div class="res-item type-match"><b>推荐组 ${i+1}${hasSS}</b><br>${t.map(m => `<span class="res-n">${m.n}</span>(<span class="res-p">${m.p}${unit}</span> <span class="res-j">${m.j}</span>)`).join(' 、 ')}</div>`;
+            h += `<div class="res-item type-match"><b>系统撮合 ${i+1}${hasSS}</b><br>${t.map(m => `<span class="res-n">${m.n}</span>(<span class="res-p">${m.p}${unit}</span> <span class="res-j">${m.j}</span>)`).join(' 、 ')}</div>`;
         });
         document.getElementById('res').innerHTML = h;
         document.getElementById('res').scrollIntoView();
