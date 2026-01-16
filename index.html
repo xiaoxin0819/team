@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手-回归稳健版</title>
+    <title>组队助手</title>
     <style>
         :root { 
             --p: #07c160; 
@@ -103,7 +103,7 @@
 <div class="card">
     <h3>1. 录入数据</h3>
     <textarea id="importBox" placeholder="在此粘贴接龙文本..."></textarea>
-    <button class="btn btn-green" onclick="smartImport()">智能解析接龙</button>
+    <button class="btn btn-green" onclick="smartImport()">智能解析</button>
     <div style="background:#fcfcfc; border:1px dashed #ccc; padding:15px; border-radius:10px; margin-top:10px;">
         <input type="text" id="m_name" placeholder="昵称">
         <select id="m_job">
@@ -118,8 +118,8 @@
     </div>
 </div>
 
-<div class="card"><h3>2. 待匹配意向</h3><div id="list"></div></div>
-<button class="btn btn-blue" style="font-size: 18px; padding: 18px; font-weight:600; border-radius:12px;" onclick="match()">生成方案 (强强进位填补)</button>
+<div class="card"><h3>2. 待匹配人员</h3><div id="list"></div></div>
+<button class="btn btn-blue" style="font-size: 18px; padding: 18px; font-weight:600; border-radius:12px;" onclick="match()">生成方案</button>
 <div id="res"></div>
 
 <script>
