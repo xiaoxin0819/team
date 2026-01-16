@@ -1,81 +1,152 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>组队助手-终极修复版</title>
-    <script>
-        // 定义全局数据
-        var list = [];
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <title>组队助手-专业版</title>
+    <style>
+        :root { --p: #07c160; --bg: #f6f7f9; --sub: #888; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
+        .card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        h3 { margin: 0 0 15px 0; font-size: 17px; display: flex; align-items: center; }
+        h3::before { content: ""; width: 4px; height: 16px; background: var(--p); border-radius: 2px; margin-right: 8px; }
+        
+        input { width: 100%; padding: 12px 15px; margin-bottom: 12px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 15px; background: #fafafa; outline: none; transition: border 0.3s; }
+        input:focus { border-color: var(--p); background: #fff; }
+        
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 600; color: #fff; margin-bottom: 10px; cursor: pointer; font-size: 16px; transition: opacity 0.2s; }
+        .btn:active { opacity: 0.8; }
+        .btn-green { background: var(--p); }
+        .btn-orange { background: #ff9500; }
+        .btn-blue { background: #007aff; }
 
-        // 录入功能
-        function addM() {
-            var n = document.getElementById('un').value;
-            var j = document.getElementById('uj').value;
-            var p = document.getElementById('up').value;
-            if(!n || !j || !p) { alert("请填全信息"); return; }
-            list.push({n:n, j:j, p:p, pre:[]});
-            document.getElementById('un').value = "";
-            show();
-        }
-
-        // 渲染功能
-        function show() {
-            var h = "";
-            for(var i=0; i<list.length; i++){
-                h += "<div style='border:1px solid #ccc;padding:10px;margin-bottom:10px;'>";
-                h += "<b>"+list[i].n+"</b> ("+list[i].j+"|"+list[i].p+")<br>";
-                for(var k=0; k<list.length; k++){
-                    if(i!=k){
-                        var isAct = list[i].pre.indexOf(list[k].n) > -1;
-                        h += "<button onclick='sel("+i+",\""+list[k].n+"\")' style='background:"+(isAct?"#07c160":"#eee")+"'>"+list[k].n+"</button>";
-                    }
-                }
-                h += "</div>";
-            }
-            document.getElementById('list').innerHTML = h || "暂无成员";
-        }
-
-        function sel(idx, name) {
-            var m = list[idx];
-            var p = m.pre.indexOf(name);
-            if(p>-1) m.pre.splice(p,1); else {
-                if(m.pre.length>=3) { alert("限选3人"); return; }
-                m.pre.push(name);
-            }
-            show();
-        }
-
-        // 分享功能
-        function share() {
-            if(list.length==0) return;
-            var url = window.location.origin + window.location.pathname + "?d=" + encodeURIComponent(JSON.stringify(list));
-            document.getElementById('out').innerText = url;
-            document.getElementById('box').style.display = "block";
-        }
-
-        window.onload = function() {
-            var d = new URLSearchParams(window.location.search).get('d');
-            if(d) { list = JSON.parse(decodeURIComponent(d)); show(); }
-        }
-    </script>
+        .member-item { border-bottom: 1px solid #f0f0f0; padding: 15px 0; }
+        .member-item:last-child { border: none; }
+        .m-info { font-weight: bold; font-size: 16px; margin-bottom: 8px; }
+        .m-detail { font-size: 13px; color: var(--sub); margin-bottom: 10px; }
+        
+        .tag { display: inline-block; padding: 6px 12px; background: #f0f2f5; border-radius: 8px; margin: 4px 6px 0 0; font-size: 13px; color: #555; border: 1px solid transparent; }
+        .tag.active { background: #e7f7ed; color: var(--p); border-color: var(--p); font-weight: bold; }
+        
+        #shareBox { display: none; background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 12px; margin-top: 5px; animation: fadeIn 0.3s; }
+        #urlOut { width: 100%; word-break: break-all; font-size: 12px; color: #666; background: #fff; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #eee; user-select: all; -webkit-user-select: all; }
+        
+        .res-item { background: #f0f9eb; padding: 12px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--p); font-size: 14px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
-<body style="padding:20px; font-family:sans-serif; background:#f0f0f0;">
-    <div style="background:#fff; padding:15px; border-radius:10px;">
-        <h3>1. 录入</h3>
-        <input id="un" placeholder="昵称" style="width:100%; margin-bottom:10px; padding:10px;">
-        <input id="uj" placeholder="职业" style="width:100%; margin-bottom:10px; padding:10px;">
-        <input id="up" placeholder="战力" style="width:100%; margin-bottom:10px; padding:10px;">
-        <button onclick="addM()" style="width:100%; padding:10px; background:#07c160; color:#fff; border:none;">确定录入</button>
-        <button onclick="share()" style="width:100%; padding:10px; background:#fa9d3b; color:#fff; border:none; margin-top:10px;">生成分享链接</button>
-        <div id="box" style="display:none; background:#fffbe6; padding:10px; margin-top:10px; word-break:break-all; border:1px dashed #ff9500;">
-            <p>请长按全选复制：</p>
-            <div id="out" style="font-size:12px;"></div>
-        </div>
+<body>
+
+<div class="card">
+    <h3>成员录入</h3>
+    <input id="un" placeholder="昵称 (如：笨蛋欧皇)">
+    <input id="uj" placeholder="职业 (如：术士)">
+    <input id="up" placeholder="战力 (如：350万)">
+    <button class="btn btn-green" onclick="addM()">确定录入</button>
+    <button class="btn btn-orange" onclick="make()">生成分享链接</button>
+    
+    <div id="shareBox">
+        <div style="font-size:13px; font-weight:bold; color:#856404;">链接已生成！请长按下方文字复制：</div>
+        <div id="urlOut"></div>
     </div>
-    <div style="margin-top:20px;">
-        <h3>2. 名单</h3>
-        <div id="list"></div>
-    </div>
+</div>
+
+<div class="card">
+    <h3>勾选意向 (限选3人)</h3>
+    <div id="list" style="color:#999; font-size:14px; text-align:center; padding:20px 0;">暂无名单，请录入...</div>
+</div>
+
+<button class="btn btn-blue" onclick="match()">点击生成匹配结果</button>
+<div id="res"></div>
+
+<script>
+    var ms = [];
+
+    window.onload = function() {
+        var d = new URLSearchParams(window.location.search).get('d');
+        if(d) {
+            try {
+                ms = JSON.parse(decodeURIComponent(d));
+                render();
+            } catch(e) { console.error("数据加载失败"); }
+        }
+    }
+
+    function addM() {
+        var n = document.getElementById('un').value.trim();
+        var j = document.getElementById('uj').value.trim();
+        var p = document.getElementById('up').value.trim();
+        if(!n || !j || !p) return alert("请填全信息");
+        ms.push({n:n, j:j, p:p, pre:[]});
+        document.getElementById('un').value = "";
+        render();
+    }
+
+    function render() {
+        var box = document.getElementById('list');
+        if(ms.length == 0) return;
+        var h = "";
+        for(var i=0; i<ms.length; i++){
+            h += '<div class="member-item">';
+            h += '<div class="m-info">'+ms[i].n+'</div>';
+            h += '<div class="m-detail">职业：'+ms[i].j+' | 战力：'+ms[i].p+' | 已选：'+ms[i].pre.length+'/3</div>';
+            for(var k=0; k<ms.length; k++){
+                if(i != k){
+                    var active = ms[i].pre.indexOf(ms[k].n) > -1;
+                    h += '<span class="tag '+(active?'active':'')+'" onclick="sel('+i+',\''+ms[k].n+'\')">'+ms[k].n+'</span>';
+                }
+            }
+            h += '</div>';
+        }
+        box.innerHTML = h;
+    }
+
+    function sel(idx, name) {
+        var m = ms[idx];
+        var p = m.pre.indexOf(name);
+        if(p > -1) { m.pre.splice(p, 1); } 
+        else {
+            if(m.pre.length >= 3) return alert("每人最多选3个");
+            m.pre.push(name);
+        }
+        render();
+    }
+
+    function make() {
+        if(ms.length == 0) return alert("名单为空");
+        var url = window.location.origin + window.location.pathname + "?d=" + encodeURIComponent(JSON.stringify(ms));
+        
+        // 尝试后台复制
+        var t = document.createElement("textarea");
+        t.value = url; document.body.appendChild(t); t.select();
+        document.execCommand('copy'); document.body.removeChild(t);
+
+        // 显式展示
+        document.getElementById('urlOut').innerText = url;
+        document.getElementById('shareBox').style.display = "block";
+        document.getElementById('shareBox').scrollIntoView();
+    }
+
+    function match() {
+        if(ms.length == 0) return;
+        var used = {}, ts = [], pool = JSON.parse(JSON.stringify(ms));
+        while(pool.length > 0) {
+            var c = pool.shift(); if(used[c.n]) continue;
+            var t = [c.n + '(' + c.j + ')']; used[c.n] = true;
+            for(var i=0; i<c.pre.length; i++){
+                if(!used[c.pre[i]] && t.length < 4){ t.push(c.pre[i]); used[c.pre[i]] = true; }
+            }
+            for(var i=0; i<ms.length; i++){
+                if(!used[ms[i].n] && t.length < 4){ t.push(ms[i].n); used[ms[i].n] = true; }
+            }
+            ts.push(t);
+        }
+        var h = "";
+        for(var i=0; i<ts.length; i++){
+            h += '<div class="res-item"><b>第 '+(i+1)+' 组：</b>' + ts[i].join(' 、 ') + '</div>';
+        }
+        document.getElementById('res').innerHTML = '<div class="card"><h3>匹配方案</h3>'+h+'</div>';
+    }
+</script>
 </body>
 </html>
