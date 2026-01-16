@@ -3,72 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手-战力全显版</title>
+    <title>组队助手-战力均衡版</title>
     <style>
         :root { --p: #07c160; --bg: #f6f7f9; --sub: #888; --red: #ff4d4f; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; line-height: 1.4; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .card { background: #fff; border-radius: 16px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        h3 { margin: 0 0 15px 0; font-size: 17px; display: flex; align-items: center; }
+        h3 { margin: 0 0 15px 0; font-size: 16px; display: flex; align-items: center; }
         h3::before { content: ""; width: 4px; height: 16px; background: var(--p); border-radius: 2px; margin-right: 8px; }
-        
-        textarea { width: 100%; height: 100px; padding: 12px; border: 1px solid #eee; border-radius: 10px; background: #fafafa; outline: none; resize: none; font-size: 14px; margin-bottom: 10px; }
+        textarea { width: 100%; height: 100px; padding: 12px; border: 1px solid #eee; border-radius: 10px; background: #fafafa; outline: none; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; }
         .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 600; color: #fff; margin-bottom: 10px; cursor: pointer; font-size: 16px; }
         .btn-green { background: var(--p); }
         .btn-orange { background: #ff9500; }
         .btn-blue { background: #007aff; }
-        .btn-gray { background: #8e8e93; font-size: 12px; padding: 8px; border-radius: 8px; color: #fff; border:none;}
-
-        .member-item { border-bottom: 1px solid #f0f0f0; padding: 15px 0; }
-        .m-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
-        .m-name { font-weight: bold; font-size: 16px; color: #000; }
-        .m-meta { font-size: 12px; color: var(--sub); margin-left: 6px; }
-        
-        /* 核心修改：意向按钮样式，显示两行信息 */
-        .tag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; }
-        .tag { padding: 8px 4px; background: #f2f4f7; border-radius: 8px; border: 1px solid transparent; text-align: center; cursor: pointer; transition: 0.2s; }
-        .tag .t-n { display: block; font-size: 13px; font-weight: bold; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .tag .t-v { display: block; font-size: 10px; color: #777; margin-top: 2px; }
-        .tag.active { background: #e7f7ed; color: var(--p); border-color: var(--p); }
-        .tag.active .t-n { color: var(--p); }
-        .tag.active .t-v { color: var(--p); opacity: 0.8; }
-
-        .res-item { background: #f0f9eb; padding: 12px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--p); font-size: 14px; }
+        .btn-gray { background: #8e8e93; font-size: 12px; padding: 8px; color: #fff; border:none; border-radius: 8px;}
+        .member-item { border-bottom: 1px solid #f0f0f0; padding: 12px 0; }
+        .m-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+        .m-name { font-weight: bold; font-size: 15px; }
+        .tag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+        .tag { padding: 6px; background: #f2f4f7; border-radius: 6px; text-align: center; border: 1px solid transparent; }
+        .tag.active { background: #e7f7ed; color: var(--p); border-color: var(--p); font-weight: bold; }
+        .tag span { display: block; font-size: 10px; opacity: 0.7; font-weight: normal; }
+        .res-item { background: #f0f9eb; padding: 12px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--p); font-size: 13px; line-height: 1.6; }
         .fixed-team { background: #eef5fe; border-left: 4px solid #007aff; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h3>1. 粘贴微信接龙内容</h3>
-    <textarea id="importBox" placeholder="在此粘贴最新的接龙全文..."></textarea>
+    <h3>1. 粘贴接龙内容</h3>
+    <textarea id="importBox" placeholder="自动识别战力与术士职业..."></textarea>
     <button class="btn btn-green" onclick="smartImport()">智能解析名单</button>
     <div style="display: flex; gap: 10px;">
-        <button class="btn btn-orange" style="flex: 1;" onclick="makeShare()">分享勾选页面</button>
-        <button class="btn btn-gray" style="flex: 0.5;" onclick="clearAll()">重置清空</button>
+        <button class="btn btn-orange" style="flex: 1;" onclick="copyShareLink()">复制分享链接</button>
+        <button class="btn btn-gray" style="flex: 0.5;" onclick="clearAll()">重置数据</button>
     </div>
 </div>
 
 <div class="card">
-    <h3>2. 勾选你的组队意向</h3>
-    <div id="list" style="color:#999; text-align:center; font-size:14px;">等待导入数据...</div>
+    <h3>2. 待匹配意向 (战力已对齐)</h3>
+    <div id="list" style="color:#999; text-align:center;">暂无数据</div>
 </div>
 
-<button class="btn btn-blue" onclick="match()">生成最终匹配结果</button>
+<button class="btn btn-blue" onclick="match()">战力均衡算法匹配</button>
 <div id="res"></div>
 
 <script>
     var ms = []; var fixedTs = [];
     const JOBS = ["术士", "骑士", "斗士", "贤者"];
-    const UNFINISHED_WORDS = ["未组队", "尚未", "待组", "缺", "差", "补"];
+    const STATUS = ["未组队", "尚未", "待组", "缺", "补"];
 
     window.onload = function() {
-        var urlData = new URLSearchParams(window.location.search).get('d');
-        if(urlData) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const d = urlParams.get('d');
+        if(d) {
             try {
-                var json = JSON.parse(decodeURIComponent(urlData));
+                const json = JSON.parse(decodeURIComponent(atob(d)));
                 ms = json.ms || []; fixedTs = json.fs || [];
                 render(); return;
-            } catch(e) {}
+            } catch(e) { console.error("URL解析失败", e); }
         }
         var lm = localStorage.getItem('team_ms'); var lf = localStorage.getItem('team_fs');
         if(lm) ms = JSON.parse(lm); if(lf) fixedTs = JSON.parse(lf);
@@ -79,61 +71,49 @@
         var text = document.getElementById('importBox').value;
         if(!text.trim()) return;
         var lines = text.split('\n');
-        var tempMs = []; var tempFs = [];
-        var allFixedNames = new Set();
+        var tempMs = []; var tempFs = []; var allFixed = new Set();
 
         lines.forEach(line => {
             var row = line.trim();
             if(!/^\d+\./.test(row)) return;
-            var content = row.replace(/^\d+\.\s*/, '');
-            var blocks = content.split(/\s+/).filter(b => b.length > 0);
-            
-            // 状态判断：一票否决
-            var isUnfinished = UNFINISHED_WORDS.some(w => row.includes(w));
+            var blocks = row.replace(/^\d+\.\s*/, '').split(/\s+/).filter(b => b.length > 0);
+            var isUnf = STATUS.some(s => row.includes(s));
 
-            if (!isUnfinished && blocks.length >= 4) {
+            if (!isUnf && blocks.length >= 4) {
                 var names = blocks.slice(0, 4);
                 tempFs.push(names.join(' 、 '));
-                names.forEach(n => allFixedNames.add(n));
-            } else {
+                names.forEach(n => allFixed.add(n));
+            } else if (blocks.length > 0) {
                 var name = blocks[0];
-                if(name && !allFixedNames.has(name)) {
+                if(!allFixed.has(name)) {
                     var job = "未知";
                     JOBS.forEach(j => { if(row.indexOf(j) > -1) job = j; });
-                    var pMatch = row.match(/(\d+万|\d+)/g);
-                    var power = pMatch ? pMatch[pMatch.length - 1] : "未知";
+                    var pMatch = row.match(/(\d+\.?\d*)/g);
+                    var pVal = pMatch ? parseFloat(pMatch[pMatch.length - 1]) : 0;
                     if(!tempMs.some(m => m.n === name)) {
-                        tempMs.push({n: name, j: job, p: power, pre: []});
+                        tempMs.push({n: name, j: job, p: pVal, pre: []});
                     }
                 }
             }
         });
-
-        ms = tempMs.filter(m => !allFixedNames.has(m.n));
+        ms = tempMs.filter(m => !allFixed.has(m.n));
         fixedTs = tempFs;
-        document.getElementById('importBox').value = "";
         save(); render();
-        alert("解析完成！战力已同步更新。");
+        document.getElementById('importBox').value = "";
     }
 
     function render() {
         var box = document.getElementById('list');
-        if(ms.length === 0) { box.innerHTML = '暂无数据'; return; }
+        if(ms.length === 0) { box.innerHTML = '请在上方粘贴内容并解析'; return; }
         var h = "";
         ms.forEach((m, i) => {
             h += `<div class="member-item">
-                <div class="m-header">
-                    <span class="m-name">${m.n} <span class="m-meta">(${m.j} | ${m.p})</span></span>
-                    <span onclick="delM(${i})" style="color:var(--red);font-size:12px;cursor:pointer">删除</span>
-                </div>
+                <div class="m-header"><span class="m-name">${m.n} <small style="color:#888">(${m.j} | ${m.p}万)</small></span></div>
                 <div class="tag-grid">`;
             ms.forEach((t, k) => {
                 if(i!==k) {
                     var act = m.pre.indexOf(t.n) > -1;
-                    h += `<div class="tag ${act?'active':''}" onclick="sel(${i},'${t.n}')">
-                            <span class="t-n">${t.n}</span>
-                            <span class="t-v">${t.j} · ${t.p}</span>
-                          </div>`;
+                    h += `<div class="tag ${act?'active':''}" onclick="sel(${i},'${t.n}')"><b>${t.n}</b><span>${t.p}万</span></div>`;
                 }
             });
             h += `</div></div>`;
@@ -148,29 +128,71 @@
     }
 
     function save() { localStorage.setItem('team_ms', JSON.stringify(ms)); localStorage.setItem('team_fs', JSON.stringify(fixedTs)); }
-    function clearAll() { if(confirm("确定清空数据？")) { localStorage.clear(); location.href = window.location.origin + window.location.pathname; } }
-    
-    function makeShare() {
-        var url = window.location.origin + window.location.pathname + "?d=" + encodeURIComponent(JSON.stringify({ms:ms, fs:fixedTs}));
-        var t = document.createElement("textarea"); t.value = url; document.body.appendChild(t); t.select();
-        document.execCommand('copy'); document.body.removeChild(t);
-        alert("链接已复制，可发给群友。");
+
+    function copyShareLink() {
+        const data = btoa(encodeURIComponent(JSON.stringify({ms:ms, fs:fixedTs})));
+        const url = window.location.origin + window.location.pathname + "?d=" + data;
+        const el = document.createElement('textarea');
+        el.value = url;
+        document.body.appendChild(el);
+        el.select();
+        try {
+            document.execCommand('copy');
+            alert("链接复制成功！");
+        } catch (err) {
+            alert("点击确定后请长按复制链接：\n" + url);
+        }
+        document.body.removeChild(el);
     }
 
+    function clearAll() { if(confirm("确定清空数据？")) { localStorage.clear(); location.href = window.location.origin + window.location.pathname; } }
+
     function match() {
-        var used = {}, results = [], pool = JSON.parse(JSON.stringify(ms));
-        var dict = {}; ms.forEach(m => dict[m.n] = m);
-        var f = (n) => { var i=dict[n]; return i ? `${n}(${i.j},${i.p})` : n; };
+        var results = [];
+        var used = new Set();
+        var pool = JSON.sort ? JSON.parse(JSON.stringify(ms)) : [...ms];
+        pool.sort((a, b) => b.p - a.p); // 战力高到底排队
+
         var h = "<h3>组队方案结果</h3>";
         fixedTs.forEach((t, i) => h += `<div class="res-item fixed-team"><b>已成组 ${i+1}：</b><br>${t}</div>`);
-        while(pool.length > 0) {
-            var c = pool.shift(); if(used[c.n]) continue;
-            var team = [f(c.n)]; used[c.n] = true;
-            c.pre.forEach(t => { if(!used[t] && team.length<4){ team.push(f(t)); used[t]=true; } });
-            ms.forEach(m => { if(!used[m.n] && team.length<4){ team.push(f(m.n)); used[m.n]=true; } });
+
+        // 术士优先分配逻辑
+        var shushi = pool.filter(p => p.j === "术士");
+        var others = pool.filter(p => p.j !== "术士");
+
+        while (used.size < pool.length) {
+            var team = [];
+            // 1. 尝试本组先分配一个术士
+            var ss = shushi.find(s => !used.has(s.n));
+            if (ss) { team.push(ss); used.add(ss.n); }
+            
+            // 2. 如果这组没人，从其他人里挑战力最高的当队长
+            if (team.length === 0) {
+                var leader = others.find(o => !used.has(o.n));
+                if (!leader) break;
+                team.push(leader); used.add(leader.n);
+            }
+
+            // 3. 找战力最相近的人补齐
+            while (team.length < 4) {
+                var target = team[team.length - 1];
+                var candidates = pool.filter(p => !used.has(p.n));
+                if (candidates.length === 0) break;
+
+                // 找战力差绝对值最小的人
+                candidates.sort((a, b) => Math.abs(a.p - target.p) - Math.abs(b.p - target.p));
+                var best = candidates[0];
+                team.push(best); used.add(best.n);
+            }
             results.push(team);
         }
-        results.forEach((t, i) => h += `<div class="res-item"><b>撮合组 ${i+1}：</b><br>${t.join(' 、 ')}</div>`);
+
+        results.forEach((t, i) => {
+            var str = t.map(m => `${m.n}(${m.j},${m.p}万)`).join(' 、 ');
+            var hasSS = t.some(m => m.j === "术士") ? "✅含术士" : "❌无术士";
+            h += `<div class="res-item"><b>撮合队伍 ${i+1} [${hasSS}]：</b><br>${str}</div>`;
+        });
+
         document.getElementById('res').innerHTML = h;
         document.getElementById('res').scrollIntoView();
     }
