@@ -2,34 +2,33 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>组队匹配助手</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <title>微信组队匹配助手</title>
     <style>
-        :root { --p: #007aff; --bg: #f2f2f7; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 15px; }
-        .card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        :root { --p: #07c160; --bg: #f7f7f7; } /* 使用微信绿 */
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        .card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         h3 { margin-top: 0; color: #333; font-size: 16px; border-left: 4px solid var(--p); padding-left: 10px; }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; color: #fff; margin-bottom: 10px; cursor: pointer; }
-        .btn-blue { background: var(--p); }
-        .btn-orange { background: #ff9500; }
-        .btn-green { background: #34c759; }
-        .member { background: #fafafa; border: 1px solid #eee; padding: 12px; border-radius: 10px; margin-bottom: 10px; }
-        .tag { display: inline-block; padding: 8px 12px; background: #fff; border: 1px solid #ddd; border-radius: 6px; margin: 5px 5px 0 0; font-size: 13px; }
-        .tag.active { background: var(--p); color: #fff; border-color: var(--p); }
-        .limit-hint { font-size: 12px; color: #ff3b30; margin-bottom: 8px; }
-        .res-box { background: #e8f5e9; border-left: 4px solid #34c759; padding: 10px; margin-top: 10px; border-radius: 4px; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #eee; border-radius: 8px; box-sizing: border-box; background: #fafafa; font-size: 16px; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; color: #fff; margin-bottom: 10px; font-size: 16px; }
+        .btn-green { background: var(--p); } /* 微信绿 */
+        .btn-orange { background: #fa9d3b; }
+        .member { background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 10px; margin-bottom: 10px; }
+        .tag { display: inline-block; padding: 8px 14px; background: #f2f2f2; border-radius: 6px; margin: 5px 5px 0 0; font-size: 14px; color: #333; }
+        .tag.active { background: var(--p); color: #fff; }
+        .limit-hint { font-size: 12px; color: #fa5151; margin-bottom: 8px; }
+        .res-box { background: #fff; border-left: 4px solid var(--p); padding: 12px; margin-top: 10px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
     <div class="card" id="adm">
         <h3>1. 成员录入</h3>
-        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">输入你的信息并点击添加，然后在下方勾选意向。</p>
-        <input id="un" placeholder="你的昵称">
-        <input id="uj" placeholder="你的职业">
-        <input id="up" placeholder="你的战力">
-        <button class="btn btn-blue" onclick="add()">确定添加</button>
-        <button class="btn btn-orange" onclick="share()">生成长链接并复制</button>
+        <input id="un" placeholder="输入你的昵称">
+        <input id="uj" placeholder="输入你的职业">
+        <input id="up" placeholder="输入你的战力">
+        <button class="btn btn-green" onclick="add()">确定添加并锁定</button>
+        <button class="btn btn-orange" onclick="share()">生成长链接 (发回微信群)</button>
+        <p style="font-size: 12px; color: #888; text-align: center;">录入后点击“生成”按钮，将新链接发回群里接龙</p>
     </div>
 
     <div class="card">
@@ -37,7 +36,7 @@
         <div id="list"></div>
     </div>
 
-    <button class="btn btn-green" onclick="match()">点击生成匹配结果</button>
+    <button class="btn btn-green" style="background:#10aeff;" onclick="match()">点击生成匹配结果</button>
     <div id="result"></div>
 
 <script>
@@ -48,32 +47,35 @@
         const p = new URLSearchParams(location.search);
         const d = p.get('d');
         if (d) {
-            ms = JSON.parse(decodeURIComponent(d));
-            render();
+            try {
+                ms = JSON.parse(decodeURIComponent(d));
+                render();
+            } catch(e) { alert("数据解析失败，请使用最新链接"); }
         }
     };
 
     function add() {
-        const n = document.getElementById('un').value, j = document.getElementById('uj').value, p = document.getElementById('up').value;
-        if (!n || !j || !p) return alert("请填全信息");
-        // 检查是否重名
-        if (ms.some(m => m.n === n)) return alert("该昵称已存在");
+        const n = document.getElementById('un').value.trim(), j = document.getElementById('uj').value.trim(), p = document.getElementById('up').value.trim();
+        if (!n || !j || !p) return alert("请把信息填完整哦");
+        if (ms.some(m => m.n === n)) return alert("此昵称已在名单中");
         
         ms.push({ n, j, p, pre: [] });
         render();
         document.getElementById('un').value = '';
+        alert("添加成功！请在下方勾选你的意向队友。");
     }
 
     function render() {
         const container = document.getElementById('list');
         if (ms.length === 0) {
-            container.innerHTML = '<p style="color:#999;font-size:13px;">暂无成员，请在上方录入...</p>';
+            container.innerHTML = '<p style="color:#999;font-size:14px;text-align:center;">名单是空的，请先在上方录入</p>';
             return;
         }
         container.innerHTML = ms.map((m, i) => `
             <div class="member">
-                <b>${m.n}</b> <small>(${m.j} | ${m.p})</small>
-                <div class="limit-hint">已选意向: ${m.pre.length} / ${MAX_SELECT}</div>
+                <div style="font-size:18px; font-weight:bold;">${m.n}</div>
+                <div style="color:#666; font-size:14px; margin:4px 0;">${m.j} | ${m.p}</div>
+                <div class="limit-hint">已选: ${m.pre.length} / ${MAX_SELECT}</div>
                 <div>
                     ${ms.map(o => o.n == m.n ? '' : `<span class="tag ${m.pre.includes(o.n) ? 'active' : ''}" onclick="sel(${i},'${o.n}')">${o.n}</span>`).join('')}
                 </div>
@@ -87,7 +89,7 @@
             m.pre = m.pre.filter(x => x != t);
         } else {
             if (m.pre.length >= MAX_SELECT) {
-                alert(`每人最多选 ${MAX_SELECT} 个意向队友`);
+                alert(`最多只能选 ${MAX_SELECT} 个人哦`);
                 return;
             }
             m.pre.push(t);
@@ -96,29 +98,25 @@
     }
 
     function share() {
-        if(ms.length === 0) return alert("没有成员数据");
+        if(ms.length === 0) return alert("还没有任何成员数据");
         const d = encodeURIComponent(JSON.stringify(ms));
         const url = window.location.origin + window.location.pathname + '?d=' + d;
+        
+        // 微信内复制优化
         const t = document.createElement('textarea');
-        t.value = url; document.body.appendChild(t); t.select();
-        document.execCommand('copy'); document.body.removeChild(t);
-        alert("已复制含数据的长链接！可以发给下一个人录入或发回群里。");
+        t.value = url;
+        document.body.appendChild(t);
+        t.select();
+        t.setSelectionRange(0, 99999); // 适配移动端
+        try {
+            document.execCommand('copy');
+            alert("链接已复制！请直接返回微信群粘贴发送。");
+        } catch (err) {
+            alert("复制失败，请手动长按输入框复制链接");
+        }
+        document.body.removeChild(t);
     }
 
     function match() {
-        if(ms.length === 0) return;
-        let used = new Set(), teams = [], pool = JSON.parse(JSON.stringify(ms));
-        while (pool.length > 0) {
-            let c = pool.shift(); 
-            if (used.has(c.n)) continue;
-            let team = [c.n + '(' + c.j + ')']; 
-            used.add(c.n);
-            for (let n of c.pre) if (!used.has(n) && team.length < 4) { team.push(n); used.add(n); }
-            for (let x of ms) if (!used.has(x.n) && team.length < 4) { team.push(x.n); used.add(x.n); }
-            teams.push(team);
-        }
-        document.getElementById('result').innerHTML = teams.map((t, i) => `<div class="res-box"><b>第${i + 1}组:</b> ${t.join('、')}</div>`).join('');
-    }
-</script>
-</body>
-</html>
+        if(ms.length === 0) return alert("名单里还没人呢");
+        let used = new Set(), teams = [], pool =
