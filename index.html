@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手</title>
+    <title>组队助手-全力进位版</title>
     <style>
         :root { --p: #07c160; --bg: #f8f9fa; --card: #ffffff; --text: #444; --blue: #007aff; --red: #ee0a24; --gold: #ffb800; --orange: #ff9500; }
         body { font-family: "Heiti SC", "STHeiti", "SimHei", "Microsoft YaHei", sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); font-weight: 300; }
@@ -22,11 +22,9 @@
         .btn-group { display: flex; gap: 10px; }
         .btn-half { flex: 1; }
 
-        /* 弹窗样式还原 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #fff; width: 85%; padding: 25px 20px; border-radius: 15px; text-align: center; }
         
-        /* 待匹配成员列表样式还原 (对应截图3) */
         .member-block { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .m-header-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .m-name-title { font-size: 18px; font-weight: bold; color: #000; }
@@ -34,13 +32,12 @@
         .btn-del-text { color: var(--red); border: 1px solid #ffccd3; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 10px; background: #fff5f6; }
         
         .tag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .tag-box { border: 1px solid #eee; border-radius: 6px; padding: 12px 5px; text-align: center; background: #fff; position: relative; }
+        .tag-box { border: 1px solid #eee; border-radius: 6px; padding: 12px 5px; text-align: center; background: #fff; }
         .tag-box.active { border-color: var(--p); background: #f0f9f4; }
         .tag-box .t-name { display: block; font-weight: bold; font-size: 16px; color: #000; margin-bottom: 4px; }
         .tag-box .t-sub { font-size: 12px; display: block; }
         
-        /* 结果样式还原 (对应截图1) */
-        .res-item { padding: 15px; border-radius: 12px; margin-top: 12px; font-size: 14px; line-height: 1.6; position: relative; }
+        .res-item { padding: 15px; border-radius: 12px; margin-top: 12px; font-size: 14px; line-height: 1.6; }
         .type-fixed { background: #f0f7ff; border-left: 5px solid #2f88ff; }
         .type-match { background: #f6fbf8; border-left: 5px solid #07c160; }
         .res-title { font-weight: bold; font-size: 15px; color: #333; margin-bottom: 5px; display: block; }
@@ -50,7 +47,7 @@
 
 <div id="parseModal" class="modal">
     <div class="modal-content">
-        <h3 style="justify-content:center; color:var(--p);">识别成功！</h3>
+        <h3 style="justify-content:center; color:var(--p);">识别成功</h3>
         <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
         <div id="parseSummary" style="text-align:left; line-height:2.2; font-size:15px;"></div>
         <button class="btn btn-green" style="margin-top:20px;" onclick="document.getElementById('parseModal').style.display='none'">确认并继续</button>
@@ -60,7 +57,7 @@
 <div class="card">
     <h3>1. 录入数据</h3>
     <textarea id="importBox" placeholder="在此粘贴接龙文本..."></textarea>
-    <button class="btn btn-green" onclick="smartImport()">智能解析</button>
+    <button class="btn btn-green" onclick="smartImport()">智能解析接龙</button>
     
     <div style="background:#fdfdfd; border:1px dashed #ddd; padding:12px; border-radius:10px;">
         <input type="text" id="m_name" placeholder="昵称">
@@ -78,11 +75,11 @@
 </div>
 
 <div class="card">
-    <h3>2. 待匹配人员</h3>
+    <h3>2. 待匹配意向</h3>
     <div id="list"></div>
 </div>
 
-<button class="btn btn-blue" style="font-size: 17px; padding: 18px; border-radius:15px; font-weight:bold;" onclick="match()">生成最终方案</button>
+<button class="btn btn-blue" style="font-size: 17px; padding: 18px; border-radius:15px; font-weight:bold;" onclick="match()">生成方案 (强强进位填补)</button>
 <div id="res"></div>
 
 <script>
@@ -132,7 +129,6 @@
         });
         ms = tM.filter(m => !allF.has(m.n)); fixedTs = tF;
         save(); render();
-        // 还原弹窗数值颜色
         const summary = `
             ♦ 固定组 (已成)： <span style="color:var(--blue); font-weight:bold;">${fixedTs.length}</span> 组<br>
             ♦ 待匹配人员： <span style="color:var(--p); font-weight:bold;">${ms.length}</span> 名<br>
@@ -157,7 +153,6 @@
         ms.splice(idx, 1); save(); render();
     }
 
-    // 还原截图3的卡片字体和排版
     function render() {
         const box = document.getElementById('list');
         if(!ms.length) { box.innerHTML = '<div style="text-align:center;color:#bbb;padding:20px;">等待录入数据...</div>'; return; }
@@ -204,41 +199,68 @@
 
     function clearAll() { if(confirm("重置吗？")) { localStorage.clear(); location.reload(); } }
 
+    // --- 核心算法：强强组向上填补意向组空位 ---
     function match() {
         let used = new Set(), intentResults = [], strongResults = [];
+        // 全局按战力降序，确保“抢人”和“填补”都是由高到低
         let pool = [...ms].sort((a,b) => b.p - a.p);
 
+        // 1. 处理意向组（战力高者优先抢人并成团）
         pool.forEach(m => {
             if (used.has(m.n)) return;
             if (m.pre.length > 0) {
-                let team = [m]; used.add(m.n);
+                let team = [m]; 
+                used.add(m.n);
+                
+                // 优先拉入勾选的队友
                 m.pre.forEach(favName => {
                     if (team.length < 4 && !used.has(favName)) {
-                        let favMember = pool.find(p => p.n === favName);
-                        if (favMember) { team.push(favMember); used.add(favName); }
+                        let f = pool.find(p => p.n === favName);
+                        if (f) { team.push(f); used.add(f.n); }
                     }
                 });
+
+                // 进位填补：如果勾选不满或人被抢了，从剩余池子里抽战力最高的人填满
+                while (team.length < 4) {
+                    let leftPool = pool.filter(p => !used.has(p.n));
+                    if (leftPool.length === 0) break;
+
+                    // 填补策略：优先补术士，其次补战力最高者 (实现强强进位)
+                    leftPool.sort((a, b) => {
+                        if (a.j === "术士" && b.j !== "术士") return -1;
+                        if (b.j === "术士" && a.j !== "术士") return 1;
+                        return b.p - a.p; // 战力高者进位
+                    });
+                    
+                    let partner = leftPool[0];
+                    team.push(partner);
+                    used.add(partner.n);
+                }
                 intentResults.push(team);
             }
         });
 
+        // 2. 处理剩余的强强组
         while (true) {
             let left = pool.filter(p => !used.has(p.n));
             if (left.length === 0) break;
-            let topSS = left.find(p => p.j === "术士");
+
             let team = [];
+            let topSS = left.find(p => p.j === "术士");
+
             if (topSS) {
                 team.push(topSS); used.add(topSS.n);
                 let partners = pool.filter(p => !used.has(p.n)).slice(0, 4 - team.length);
                 partners.forEach(p => { team.push(p); used.add(p.n); });
             } else {
-                let topLeft = pool.filter(p => !used.has(p.n)).slice(0, 4);
+                let topLeft = left.slice(0, 4);
                 if (topLeft.length === 0) break;
                 topLeft.forEach(p => { team.push(p); used.add(p.n); });
             }
             strongResults.push(team);
         }
 
+        // 渲染结果
         let h = `<h3 style="margin-top:20px;">匹配方案结果</h3>`;
         fixedTs.forEach((t, i) => h += `<div class="res-item type-fixed"><span class="res-title">已成组 ${i+1}</span>${t}</div>`);
         
