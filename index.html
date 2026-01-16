@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>组队助手-GitHub版</title>
+    <style>
+        :root { --p: #007aff; --bg: #f2f2f7; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        .card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; color: #fff; margin-bottom: 10px; cursor: pointer; }
+        .btn-blue { background: var(--p); }
+        .btn-orange { background: #ff9500; }
+        .btn-green { background: #34c759; }
+        .member { background: #fafafa; border: 1px solid #eee; padding: 12px; border-radius: 10px; margin-bottom: 10px; }
+        .tag { display: inline-block; padding: 6px 10px; background: #fff; border: 1px solid #ddd; border-radius: 6px; margin: 5px 5px 0 0; font-size: 12px; }
+        .tag.active { background: var(--p); color: #fff; border-color: var(--p); }
+        .res-box { background: #e8f5e9; border-left: 4px solid #34c759; padding: 10px; margin-top: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="card" id="adm">
+        <h3>1. 管理员录入 (录完发群)</h3>
+        <input id="un" placeholder="昵称: 如 笨蛋xx">
+        <input id="uj" placeholder="职业: 如 术士">
+        <input id="up" placeholder="战力: 如 300万">
+        <button class="btn btn-blue" onclick="add()">添加成员</button>
+        <button class="btn btn-orange" onclick="share()">生成分享链接并复制</button>
+    </div>
+
+    <div class="card">
+        <h3>2. 成员名单 (点名字互选)</h3>
+        <div id="list"></div>
+    </div>
+
+    <button class="btn btn-green" onclick="match()">点击生成匹配结果</button>
+    <div id="res"></div>
+
+<script>
+    let ms = [];
+    window.onload = () => {
+        const p = new URLSearchParams(location.search);
+        const d = p.get('d');
+        if (d) {
+            ms = JSON.parse(decodeURIComponent(d));
+            document.getElementById('adm').style.display = 'none'; // 成员打开时不显示录入框
+            render();
+        }
+    };
+
+    function add() {
+        const n = document.getElementById('un').value, j = document.getElementById('uj').value, p = document.getElementById('up').value;
+        if (!n || !j || !p) return alert("请填全信息");
+        ms.push({ n, j, p, pre: [] });
+        render();
+        document.getElementById('un').value = '';
+    }
+
+    function render() {
+        document.getElementById('list').innerHTML = ms.map((m, i) => `
+            <div class="member">
+                <b>${m.n}</b><br><small>职业：${m.j} | 战力：${m.p}</small><br>
+                ${ms.map(o => o.n == m.n ? '' : `<span class="tag ${m.pre.includes(o.n) ? 'active' : ''}" onclick="sel(${i},'${o.n}')">${o.n}</span>`).join('')}
+            </div>
+        `).join('');
+    }
+
+    function sel(i, t) {
+        let m = ms[i];
+        m.pre = m.pre.includes(t) ? m.pre.filter(x => x != t) : [...m.pre, t];
+        render();
+    }
+
+    function share() {
+        const d = encodeURIComponent(JSON.stringify(ms));
+        const url = location.origin + location.pathname + '?d=' + d;
+        const t = document.createElement('textarea');
+        t.value = url; document.body.appendChild(t); t.select();
+        document.execCommand('copy'); document.body.removeChild(t);
+        alert("链接已复制！去微信群发给大家吧。");
+    }
+
+    function match() {
+        let u = new Set(), ts = [], p = JSON.parse(JSON.stringify(ms));
+        while (p.length > 0) {
+            let c = p.shift(); if (u.has(c.n)) continue;
+            let team = [c.n + '(' + c.j + ')']; u.add(c.n);
+            for (let n of c.pre) if (!u.has(n) && team.length < 4) { team.push(n); u.add(n); }
+            for (let x of ms) if (!u.has(x.n) && team.length < 4) { team.push(x.n); u.add(x.n); }
+            ts.push(team);
+        }
+        document.getElementById('res').innerHTML = ts.map((t, i) => `<div class="res-box"><b>第${i + 1}组:</b> ${t.join('、')}</div>`).join('');
+    }
+</script>
+</body>
+</html>
