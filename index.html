@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手</title>
+    <title>组队助手-全信息增强版</title>
     <style>
         :root { --p: #07c160; --bg: #f6f7f9; --sub: #888; --red: #ff4d4f; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
@@ -20,14 +20,16 @@
         .member-item { border-bottom: 1px solid #f0f0f0; padding: 15px 0; position: relative; }
         .member-item:last-child { border: none; }
         .m-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .m-info { font-weight: bold; font-size: 16px; }
+        /* 名字增强显示 */
+        .m-info { font-weight: bold; font-size: 16px; color: #000; }
+        .m-attr { font-weight: normal; font-size: 13px; color: #666; margin-left: 4px; }
         .del-btn { color: var(--red); font-size: 13px; cursor: pointer; padding: 5px 10px; border: 1px solid var(--red); border-radius: 6px; }
-        .m-detail { font-size: 13px; color: var(--sub); margin-bottom: 10px; }
-        .tag { display: inline-block; padding: 6px 12px; background: #f0f2f5; border-radius: 8px; margin: 4px 6px 0 0; font-size: 13px; color: #555; border: 1px solid transparent; }
+        .m-detail { font-size: 13px; color: var(--sub); margin-bottom: 12px; display: block; margin-top: 4px; }
+        .tag { display: inline-block; padding: 8px 12px; background: #f0f2f5; border-radius: 8px; margin: 4px 6px 4px 0; font-size: 13px; color: #555; border: 1px solid transparent; line-height: 1.4; }
         .tag.active { background: #e7f7ed; color: var(--p); border-color: var(--p); font-weight: bold; }
         #shareBox { display: none; background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 12px; margin-top: 5px; }
         #urlOut { width: 100%; word-break: break-all; font-size: 12px; color: #666; background: #fff; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #eee; user-select: all; -webkit-user-select: all; }
-        .res-item { background: #f0f9eb; padding: 12px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--p); font-size: 14px; line-height: 1.6; }
+        .res-item { background: #f0f9eb; padding: 12px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--p); font-size: 14px; line-height: 1.8; }
     </style>
 </head>
 <body>
@@ -91,15 +93,27 @@
     function render() {
         var box = document.getElementById('list');
         if(ms.length == 0) { box.innerHTML = '暂无名单，请录入...'; return; }
+        
+        // 建立字典方便查询
+        var dict = {};
+        ms.forEach(function(m){ dict[m.n] = m; });
+
         var h = "";
         for(var i=0; i<ms.length; i++){
             h += '<div class="member-item">';
-            h += '  <div class="m-header"><div class="m-info">'+ms[i].n+'</div><div class="del-btn" onclick="delM('+i+')">删除</div></div>';
-            h += '  <div class="m-detail">'+ms[i].j+' | '+ms[i].p+' | 已选：'+ms[i].pre.length+'/3</div>';
+            h += '  <div class="m-header">';
+            h += '    <div class="m-info">' + ms[i].n + '<span class="m-attr">(' + ms[i].j + ' | ' + ms[i].p + ')</span></div>';
+            h += '    <div class="del-btn" onclick="delM('+i+')">删除</div>';
+            h += '  </div>';
+            h += '  <div class="m-detail">请选择你的意向队友 (已选：'+ms[i].pre.length+'/3)：</div>';
             for(var k=0; k<ms.length; k++){
                 if(i != k){
-                    var active = ms[i].pre.indexOf(ms[k].n) > -1;
-                    h += '<span class="tag '+(active?'active':'')+'" onclick="sel('+i+',\''+ms[k].n+'\')">'+ms[k].n+'</span>';
+                    var target = ms[k];
+                    var active = ms[i].pre.indexOf(target.n) > -1;
+                    // 这里是改动核心：让待勾选的按钮也显示详细信息
+                    h += '<span class="tag '+(active?'active':'')+'" onclick="sel('+i+',\''+target.n+'\')">';
+                    h += target.n + '<br><small style="opacity:0.8;font-size:10px;">' + target.j + '·' + target.p + '</small>';
+                    h += '</span>';
                 }
             }
             h += '</div>';
@@ -126,12 +140,9 @@
         document.getElementById('shareBox').scrollIntoView();
     }
 
-    // 核心优化：匹配结果显示完整信息
     function match() {
         if(ms.length == 0) return;
         var used = {}, ts = [], pool = JSON.parse(JSON.stringify(ms));
-        
-        // 创建一个查找字典，方便快速获取成员的职业和战力
         var dict = {};
         ms.forEach(function(item){ dict[item.n] = item; });
 
@@ -143,25 +154,15 @@
         while(pool.length > 0) {
             var c = pool.shift(); 
             if(used[c.n]) continue;
-            
             var team = [formatInfo(c.n)]; 
             used[c.n] = true;
-
-            // 匹配意向队友
             for(var i=0; i<c.pre.length; i++){
                 var target = c.pre[i];
-                if(!used[target] && team.length < 4){ 
-                    team.push(formatInfo(target)); 
-                    used[target] = true; 
-                }
+                if(!used[target] && team.length < 4){ team.push(formatInfo(target)); used[target] = true; }
             }
-            // 填充剩余名额
             for(var i=0; i<ms.length; i++){
                 var target = ms[i].n;
-                if(!used[target] && team.length < 4){ 
-                    team.push(formatInfo(target)); 
-                    used[target] = true; 
-                }
+                if(!used[target] && team.length < 4){ team.push(formatInfo(target)); used[target] = true; }
             }
             ts.push(team);
         }
