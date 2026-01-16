@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手</title>
+    <title>组队助手-逻辑终结版</title>
     <style>
         :root { --p: #07c160; --bg: #f6f7f9; --sub: #888; --red: #ff4d4f; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
@@ -17,12 +17,9 @@
         .btn-blue { background: #007aff; }
         .btn-gray { background: #8e8e93; font-size: 12px; padding: 8px; border-radius: 8px; color: #fff; border:none;}
         .member-item { border-bottom: 1px solid #f0f0f0; padding: 15px 0; }
-        .m-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .m-info { font-weight: bold; font-size: 16px; }
-        .m-attr { font-weight: normal; font-size: 12px; color: #777; margin-left: 5px; }
+        .m-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: bold; }
         .tag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 10px; }
-        .tag { padding: 8px 4px; background: #f0f2f5; border-radius: 8px; font-size: 11px; color: #444; text-align: center; border: 1px solid transparent; line-height: 1.3; cursor: pointer; }
-        .tag b { display: block; font-size: 13px; margin-bottom: 2px; }
+        .tag { padding: 8px 4px; background: #f0f2f5; border-radius: 8px; font-size: 11px; color: #444; text-align: center; border: 1px solid transparent; line-height: 1.3; }
         .tag.active { background: #e7f7ed; color: var(--p); border-color: var(--p); font-weight: bold; }
         .res-item { background: #f0f9eb; padding: 12px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--p); font-size: 14px; }
         .fixed-team { background: #eef5fe; border-left: 4px solid #007aff; }
@@ -31,12 +28,12 @@
 <body>
 
 <div class="card">
-    <h3>1. 粘贴接龙内容</h3>
-    <textarea id="importBox" placeholder="直接粘贴微信群里的接龙全文..."></textarea>
+    <h3>1. 粘贴接龙全文</h3>
+    <textarea id="importBox" placeholder="在此粘贴微信接龙内容..."></textarea>
     <button class="btn btn-green" onclick="smartImport()">智能逻辑解析</button>
     <div style="display: flex; gap: 10px;">
-        <button class="btn btn-orange" style="flex: 1;" onclick="makeShare()">生成并复制分享链接</button>
-        <button class="btn btn-gray" style="flex: 0.5;" onclick="clearAll()">清空重置</button>
+        <button class="btn btn-orange" style="flex: 1;" onclick="makeShare()">分享链接</button>
+        <button class="btn btn-gray" style="flex: 0.5;" onclick="clearAll()">重置</button>
     </div>
 </div>
 
@@ -45,12 +42,13 @@
     <div id="list" style="color:#999; text-align:center;">暂无数据</div>
 </div>
 
-<button class="btn btn-blue" onclick="match()">点击计算匹配结果</button>
+<button class="btn btn-blue" onclick="match()">生成匹配结果</button>
 <div id="res"></div>
 
 <script>
     var ms = []; var fixedTs = [];
     const JOBS = ["术士", "骑士", "斗士", "贤者"];
+    const UNFINISHED_WORDS = ["未组队", "尚未", "待组", "缺", "差", "补"];
 
     window.onload = function() {
         var urlData = new URLSearchParams(window.location.search).get('d');
@@ -73,68 +71,58 @@
         var tempMs = []; var tempFs = [];
         var allFixedNames = new Set();
 
-        // 步骤1：先找已成功的队伍（一行内名字多，且没说“尚未”）
-        lines.forEach(line => {
-            var row = line.trim();
-            if(!/^\d+\./.test(row)) return; // 必须是 1. 2. 这种开头
-
-            var content = row.replace(/^\d+\.\s*/, '');
-            var blocks = content.split(/\s+/).filter(b => b.length > 0);
-            
-            // 逻辑判断：如果包含“尚未”或“待组”或“差x人”，即便人多也算“待匹配”
-            var isUnfinished = /(尚未|待组|差|补)/.test(row);
-            
-            if (!isUnfinished && blocks.length >= 4) {
-                // 判定为固定队：取前4个词作为名字
-                var names = blocks.slice(0, 4);
-                tempFs.push(names.join(' 、 '));
-                names.forEach(n => allFixedNames.add(n));
-            }
-        });
-
-        // 步骤2：找待组队的个人
         lines.forEach(line => {
             var row = line.trim();
             if(!/^\d+\./.test(row)) return;
-            
+
             var content = row.replace(/^\d+\.\s*/, '');
             var blocks = content.split(/\s+/).filter(b => b.length > 0);
-            var name = blocks[0];
+            
+            // 💡 核心逻辑：一票否决权
+            // 如果这一行包含任何“未组队”相关的关键词，它绝对不可能是固定队
+            var isStrictlyUnfinished = UNFINISHED_WORDS.some(word => row.includes(word));
 
-            // 如果这个名字没出现在上面的固定队里，就纳入匹配名单
-            if(name && !allFixedNames.has(name)) {
-                // 搜索职业
-                var job = "未知";
-                JOBS.forEach(j => { if(row.indexOf(j) > -1) job = j; });
-                
-                // 搜索战力 (匹配 xxx万 或 结尾的纯数字)
-                var pMatch = row.match(/(\d+万|\d+)/g);
-                var power = pMatch ? pMatch[pMatch.length - 1] : "未知";
-
-                if(!tempMs.some(m => m.n === name)) {
-                    tempMs.push({n: name, j: job, p: power, pre: []});
+            if (!isStrictlyUnfinished && blocks.length >= 4) {
+                // 只有完全没有“未组队”字样，且块数多，才算固定队
+                var names = blocks.slice(0, 4);
+                tempFs.push(names.join(' 、 '));
+                names.forEach(n => allFixedNames.add(n));
+            } else {
+                // 判定为个人
+                var name = blocks[0];
+                if(name && !allFixedNames.has(name)) {
+                    var job = "未知";
+                    JOBS.forEach(j => { if(row.indexOf(j) > -1) job = j; });
+                    var pMatch = row.match(/(\d+万|\d+)/g);
+                    var power = pMatch ? pMatch[pMatch.length - 1] : "未知";
+                    
+                    if(!tempMs.some(m => m.n === name)) {
+                        tempMs.push({n: name, j: job, p: power, pre: []});
+                    }
                 }
             }
         });
 
-        ms = tempMs; fixedTs = tempFs;
+        // 最终过滤：确保固定队里的人不会出现在待匹配列表
+        ms = tempMs.filter(m => !allFixedNames.has(m.n));
+        fixedTs = tempFs;
         document.getElementById('importBox').value = "";
         save(); render();
-        alert(`解析成功！\n待匹配：${ms.length}人\n已成组：${fixedTs.length}队`);
+        alert(`解析成功！\n待匹配：${ms.length}人\n固定队：${fixedTs.length}组`);
     }
 
     function render() {
         var box = document.getElementById('list');
-        if(ms.length === 0) { box.innerHTML = '暂无待匹配成员'; return; }
+        if(ms.length === 0) { box.innerHTML = '暂无数据'; return; }
         var h = "";
         ms.forEach((m, i) => {
             h += `<div class="member-item">
-                <div class="m-header"><b>${m.n}</b> <span class="m-attr">(${m.j}|${m.p})</span> <span onclick="delM(${i})" style="color:var(--red);font-size:12px;cursor:pointer">删除</span></div>
+                <div class="m-header">${m.n} <small style="font-weight:normal;color:#777">(${m.j}|${m.p})</small></div>
                 <div class="tag-grid">`;
             ms.forEach((t, k) => {
                 if(i!==k) {
                     var act = m.pre.indexOf(t.n) > -1;
-                    h += `<div class="tag ${act?'active':''}" onclick="sel(${i},'${t.n}')"><b>${t.n}</b><span>${t.j}·${t.p}</span></div>`;
+                    h += `<div class="tag ${act?'active':''}" onclick="sel(${i},'${t.n}')"><b>${t.n}</b><br>${t.j}</div>`;
                 }
             });
             h += `</div></div>`;
@@ -144,30 +132,27 @@
 
     function sel(idx, name) {
         var m = ms[idx], p = m.pre.indexOf(name);
-        if(p>-1) m.pre.splice(p,1); else { if(m.pre.length>=3) return alert("每人限选3个意向"); m.pre.push(name); }
+        if(p>-1) m.pre.splice(p,1); else { if(m.pre.length>=3) return alert("限选3人"); m.pre.push(name); }
         save(); render();
     }
 
-    function delM(idx) { ms.splice(idx,1); save(); render(); }
     function save() { localStorage.setItem('team_ms', JSON.stringify(ms)); localStorage.setItem('team_fs', JSON.stringify(fixedTs)); }
-    function clearAll() { if(confirm("确定清空数据？")) { localStorage.clear(); location.href = window.location.origin + window.location.pathname; } }
+    function clearAll() { if(confirm("确定重置？")) { localStorage.clear(); location.href = window.location.origin + window.location.pathname; } }
     
     function makeShare() {
         var data = {ms:ms, fs:fixedTs};
         var url = window.location.origin + window.location.pathname + "?d=" + encodeURIComponent(JSON.stringify(data));
         var t = document.createElement("textarea"); t.value = url; document.body.appendChild(t); t.select();
         document.execCommand('copy'); document.body.removeChild(t);
-        alert("链接已复制！\n发给群友后，他们点开就能直接勾选。");
+        alert("分享链接已复制");
     }
 
     function match() {
         var used = {}, results = [], pool = JSON.parse(JSON.stringify(ms));
         var dict = {}; ms.forEach(m => dict[m.n] = m);
         var f = (n) => { var i=dict[n]; return i ? `${n}(${i.j},${i.p})` : n; };
-        
-        var h = "<h3>最终组队方案</h3>";
-        fixedTs.forEach((team, i) => h += `<div class="res-item fixed-team"><b>已成组队伍 ${i+1}：</b><br>${team}</div>`);
-        
+        var h = "<h3>组队方案</h3>";
+        fixedTs.forEach((t, i) => h += `<div class="res-item fixed-team"><b>固定队伍 ${i+1}：</b><br>${t}</div>`);
         while(pool.length > 0) {
             var c = pool.shift(); if(used[c.n]) continue;
             var team = [f(c.n)]; used[c.n] = true;
@@ -175,8 +160,7 @@
             ms.forEach(m => { if(!used[m.n] && team.length<4){ team.push(f(m.n)); used[m.n]=true; } });
             results.push(team);
         }
-
-        results.forEach((t, i) => h += `<div class="res-item"><b>系统撮合队伍 ${i+1}：</b><br>${t.join(' 、 ')}</div>`);
+        results.forEach((t, i) => h += `<div class="res-item"><b>撮合队伍 ${i+1}：</b><br>${t.join(' 、 ')}</div>`);
         document.getElementById('res').innerHTML = h;
         document.getElementById('res').scrollIntoView();
     }
