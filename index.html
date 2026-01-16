@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手-全力进位版</title>
+    <title>组队助手</title>
     <style>
         :root { --p: #07c160; --bg: #f8f9fa; --card: #ffffff; --text: #444; --blue: #007aff; --red: #ee0a24; --gold: #ffb800; --orange: #ff9500; }
         body { font-family: "Heiti SC", "STHeiti", "SimHei", "Microsoft YaHei", sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); font-weight: 300; }
@@ -57,7 +57,7 @@
 <div class="card">
     <h3>1. 录入数据</h3>
     <textarea id="importBox" placeholder="在此粘贴接龙文本..."></textarea>
-    <button class="btn btn-green" onclick="smartImport()">智能解析接龙</button>
+    <button class="btn btn-green" onclick="smartImport()">智能解析</button>
     
     <div style="background:#fdfdfd; border:1px dashed #ddd; padding:12px; border-radius:10px;">
         <input type="text" id="m_name" placeholder="昵称">
@@ -75,7 +75,7 @@
 </div>
 
 <div class="card">
-    <h3>2. 待匹配意向</h3>
+    <h3>2. 待匹配人员</h3>
     <div id="list"></div>
 </div>
 
