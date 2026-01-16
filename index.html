@@ -3,48 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>组队助手-GitHub版</title>
+    <title>组队匹配助手</title>
     <style>
         :root { --p: #007aff; --bg: #f2f2f7; }
         body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 15px; }
         .card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        h3 { margin-top: 0; color: #333; font-size: 16px; border-left: 4px solid var(--p); padding-left: 10px; }
         input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; color: #fff; margin-bottom: 10px; cursor: pointer; }
         .btn-blue { background: var(--p); }
         .btn-orange { background: #ff9500; }
         .btn-green { background: #34c759; }
         .member { background: #fafafa; border: 1px solid #eee; padding: 12px; border-radius: 10px; margin-bottom: 10px; }
-        .tag { display: inline-block; padding: 6px 10px; background: #fff; border: 1px solid #ddd; border-radius: 6px; margin: 5px 5px 0 0; font-size: 12px; }
+        .tag { display: inline-block; padding: 8px 12px; background: #fff; border: 1px solid #ddd; border-radius: 6px; margin: 5px 5px 0 0; font-size: 13px; }
         .tag.active { background: var(--p); color: #fff; border-color: var(--p); }
+        .limit-hint { font-size: 12px; color: #ff3b30; margin-bottom: 8px; }
         .res-box { background: #e8f5e9; border-left: 4px solid #34c759; padding: 10px; margin-top: 10px; border-radius: 4px; }
     </style>
 </head>
 <body>
     <div class="card" id="adm">
-        <h3>1. 管理员录入 (录完发群)</h3>
-        <input id="un" placeholder="昵称: 如 笨蛋xx">
-        <input id="uj" placeholder="职业: 如 术士">
-        <input id="up" placeholder="战力: 如 300万">
-        <button class="btn btn-blue" onclick="add()">添加成员</button>
-        <button class="btn btn-orange" onclick="share()">生成分享链接并复制</button>
+        <h3>1. 成员录入</h3>
+        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">输入你的信息并点击添加，然后在下方勾选意向。</p>
+        <input id="un" placeholder="你的昵称">
+        <input id="uj" placeholder="你的职业">
+        <input id="up" placeholder="你的战力">
+        <button class="btn btn-blue" onclick="add()">确定添加</button>
+        <button class="btn btn-orange" onclick="share()">生成长链接并复制</button>
     </div>
 
     <div class="card">
-        <h3>2. 成员名单 (点名字互选)</h3>
+        <h3>2. 勾选意向 (每人限选3个)</h3>
         <div id="list"></div>
     </div>
 
     <button class="btn btn-green" onclick="match()">点击生成匹配结果</button>
-    <div id="res"></div>
+    <div id="result"></div>
 
 <script>
     let ms = [];
+    const MAX_SELECT = 3;
+
     window.onload = () => {
         const p = new URLSearchParams(location.search);
         const d = p.get('d');
         if (d) {
             ms = JSON.parse(decodeURIComponent(d));
-            document.getElementById('adm').style.display = 'none'; // 成员打开时不显示录入框
             render();
         }
     };
@@ -52,45 +56,68 @@
     function add() {
         const n = document.getElementById('un').value, j = document.getElementById('uj').value, p = document.getElementById('up').value;
         if (!n || !j || !p) return alert("请填全信息");
+        // 检查是否重名
+        if (ms.some(m => m.n === n)) return alert("该昵称已存在");
+        
         ms.push({ n, j, p, pre: [] });
         render();
         document.getElementById('un').value = '';
     }
 
     function render() {
-        document.getElementById('list').innerHTML = ms.map((m, i) => `
+        const container = document.getElementById('list');
+        if (ms.length === 0) {
+            container.innerHTML = '<p style="color:#999;font-size:13px;">暂无成员，请在上方录入...</p>';
+            return;
+        }
+        container.innerHTML = ms.map((m, i) => `
             <div class="member">
-                <b>${m.n}</b><br><small>职业：${m.j} | 战力：${m.p}</small><br>
-                ${ms.map(o => o.n == m.n ? '' : `<span class="tag ${m.pre.includes(o.n) ? 'active' : ''}" onclick="sel(${i},'${o.n}')">${o.n}</span>`).join('')}
+                <b>${m.n}</b> <small>(${m.j} | ${m.p})</small>
+                <div class="limit-hint">已选意向: ${m.pre.length} / ${MAX_SELECT}</div>
+                <div>
+                    ${ms.map(o => o.n == m.n ? '' : `<span class="tag ${m.pre.includes(o.n) ? 'active' : ''}" onclick="sel(${i},'${o.n}')">${o.n}</span>`).join('')}
+                </div>
             </div>
         `).join('');
     }
 
     function sel(i, t) {
         let m = ms[i];
-        m.pre = m.pre.includes(t) ? m.pre.filter(x => x != t) : [...m.pre, t];
+        if (m.pre.includes(t)) {
+            m.pre = m.pre.filter(x => x != t);
+        } else {
+            if (m.pre.length >= MAX_SELECT) {
+                alert(`每人最多选 ${MAX_SELECT} 个意向队友`);
+                return;
+            }
+            m.pre.push(t);
+        }
         render();
     }
 
     function share() {
+        if(ms.length === 0) return alert("没有成员数据");
         const d = encodeURIComponent(JSON.stringify(ms));
-        const url = location.origin + location.pathname + '?d=' + d;
+        const url = window.location.origin + window.location.pathname + '?d=' + d;
         const t = document.createElement('textarea');
         t.value = url; document.body.appendChild(t); t.select();
         document.execCommand('copy'); document.body.removeChild(t);
-        alert("链接已复制！去微信群发给大家吧。");
+        alert("已复制含数据的长链接！可以发给下一个人录入或发回群里。");
     }
 
     function match() {
-        let u = new Set(), ts = [], p = JSON.parse(JSON.stringify(ms));
-        while (p.length > 0) {
-            let c = p.shift(); if (u.has(c.n)) continue;
-            let team = [c.n + '(' + c.j + ')']; u.add(c.n);
-            for (let n of c.pre) if (!u.has(n) && team.length < 4) { team.push(n); u.add(n); }
-            for (let x of ms) if (!u.has(x.n) && team.length < 4) { team.push(x.n); u.add(x.n); }
-            ts.push(team);
+        if(ms.length === 0) return;
+        let used = new Set(), teams = [], pool = JSON.parse(JSON.stringify(ms));
+        while (pool.length > 0) {
+            let c = pool.shift(); 
+            if (used.has(c.n)) continue;
+            let team = [c.n + '(' + c.j + ')']; 
+            used.add(c.n);
+            for (let n of c.pre) if (!used.has(n) && team.length < 4) { team.push(n); used.add(n); }
+            for (let x of ms) if (!used.has(x.n) && team.length < 4) { team.push(x.n); used.add(x.n); }
+            teams.push(team);
         }
-        document.getElementById('res').innerHTML = ts.map((t, i) => `<div class="res-box"><b>第${i + 1}组:</b> ${t.join('、')}</div>`).join('');
+        document.getElementById('result').innerHTML = teams.map((t, i) => `<div class="res-box"><b>第${i + 1}组:</b> ${t.join('、')}</div>`).join('');
     }
 </script>
 </body>
