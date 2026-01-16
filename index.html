@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手-功能完备版</title>
+    <title>组队助手-色彩优化版</title>
     <style>
-        :root { --p: #07c160; --bg: #f8f9fa; --card: #ffffff; --text: #444; --blue: #007aff; --red: #ee0a24; --gold: #FFD700; }
+        :root { --p: #07c160; --bg: #f8f9fa; --card: #ffffff; --text: #444; --blue: #007aff; --red: #ee0a24; --gold: #FFD700; --orange: #ff9500; }
         body { font-family: "Heiti SC", "STHeiti", "SimHei", "Microsoft YaHei", sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); font-weight: 300; }
         
         .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -19,6 +19,7 @@
         .btn-green { background: var(--p); }
         .btn-blue { background: var(--blue); }
         .btn-red { background: var(--red); }
+        .btn-orange { background: var(--orange); } /* 新增橙色按钮 */
         .btn-group { display: flex; gap: 10px; }
         .btn-half { flex: 1; }
         .btn-sm { padding: 8px; font-size: 12px; margin-bottom: 0; }
@@ -27,29 +28,25 @@
         .manual-box { background: #fdfdfd; border: 1px dashed #ddd; padding: 12px; border-radius: 10px; margin-top: 10px; }
         .input-label { font-size: 11px; color: #999; margin-bottom: 3px; display: block; }
 
-        /* 分享弹窗 */
-        #shareModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #fff; width: 80%; padding: 20px; border-radius: 12px; text-align: center; }
-        #shareLinkArea { width: 100%; height: 60px; font-size: 11px; background: #f5f5f5; border: 1px solid #ddd; padding: 8px; border-radius: 4px; margin: 10px 0; color: #777; }
-
-        /* 成员卡片与删除按钮 */
+        /* 成员卡片与样式 */
         .member-card { border-bottom: 1px solid #f2f2f2; padding: 15px 0; position: relative; }
         .m-header { margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; padding-right: 45px; }
         .btn-del { position: absolute; right: 0; top: 12px; color: var(--red); font-size: 12px; border: 1px solid var(--red); padding: 2px 6px; border-radius: 4px; cursor: pointer; }
         
-        /* 核心定制样式 */
         .c-name { font-weight: bold; color: #000; font-size: 15px; }
         .c-power { color: var(--red); font-weight: 400; }
         .c-job { color: var(--gold); font-weight: bold; font-size: 11px; }
         
         .tag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .tag { padding: 10px 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .tag { padding: 10px 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; text-align: center; cursor: pointer; }
         .tag .t-n { display: block; font-weight: bold; color: #000; font-size: 14px; margin-bottom: 2px; }
-        
         .tag.active { background: #f0f9f4; border-color: var(--p); }
         .tag.active .t-n { color: var(--p); }
 
-        /* 结果展示 */
+        /* 弹窗及其他 */
+        #shareModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; width: 80%; padding: 20px; border-radius: 12px; text-align: center; }
+        #shareLinkArea { width: 100%; height: 60px; font-size: 11px; background: #f5f5f5; border: 1px solid #ddd; padding: 8px; border-radius: 4px; margin: 10px 0; color: #777; }
         .res-item { padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 13px; line-height: 1.6; }
         .type-fixed { background: #f0f6ff; border-left: 3px solid var(--blue); }
         .type-match { background: #f4faf6; border-left: 3px solid var(--p); }
@@ -75,7 +72,7 @@
     <button class="btn btn-green" onclick="smartImport()">智能解析接龙</button>
     
     <div class="manual-box">
-        <div style="font-size:12px; margin-bottom:8px; color:#666;">手动添加单人：</div>
+        <div style="font-size:12px; margin-bottom:8px; color:#666;">手动添加人员：</div>
         <span class="input-label">昵称</span>
         <input type="text" id="m_name" placeholder="输入昵称">
         <span class="input-label">职业</span>
@@ -87,7 +84,7 @@
         </select>
         <span class="input-label">战力 (数值)</span>
         <input type="number" id="m_power" placeholder="输入数字">
-        <button class="btn btn-blue btn-sm" onclick="addManual()">确认加入名单</button>
+        <button class="btn btn-orange btn-sm" onclick="addManual()">确认加入名单</button>
     </div>
 
     <div class="btn-group" style="margin-top:15px;">
@@ -101,7 +98,7 @@
     <div id="list" style="color:#bbb; text-align:center; padding:15px 0;">等待录入...</div>
 </div>
 
-<button class="btn btn-blue" style="font-size: 16px; padding: 15px; border-radius:12px; margin-top:10px;" onclick="match()">生成最终撮合方案</button>
+<button class="btn btn-blue" style="font-size: 16px; padding: 15px; border-radius:12px;" onclick="match()">生成最终撮合方案</button>
 <div id="res"></div>
 
 <script>
@@ -158,19 +155,17 @@
         const name = document.getElementById('m_name').value.trim();
         const job = document.getElementById('m_job').value;
         const power = parseFloat(document.getElementById('m_power').value);
-        if(!name || isNaN(power)) return alert("必填昵称和战力");
+        if(!name || isNaN(power)) return alert("请填写完整的昵称和战力数值");
         ms.push({ n: name, j: job, p: power, pre: [] });
         save(); render();
         document.getElementById('m_name').value = "";
         document.getElementById('m_power').value = "";
     }
 
-    // 删除单人功能
     function removeOne(idx) {
-        if(confirm(`确定移除成员 ${ms[idx].n} 吗？`)) {
+        if(confirm(`确定从名单中移除 ${ms[idx].n} 吗？`)) {
             ms.splice(idx, 1);
-            save();
-            render();
+            save(); render();
         }
     }
 
@@ -218,10 +213,10 @@
         const area = document.getElementById('shareLinkArea');
         area.select();
         document.execCommand('copy');
-        alert("已选中复制！");
+        alert("已全选复制！");
     }
 
-    function clearAll() { if(confirm("清空全部名单？")) { localStorage.clear(); location.reload(); } }
+    function clearAll() { if(confirm("确定清空全部数据并重置吗？")) { localStorage.clear(); location.reload(); } }
 
     function match() {
         let used = new Set(), results = [];
