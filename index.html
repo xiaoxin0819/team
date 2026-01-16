@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手</title>
+    <title>组队助手-正式版</title>
     <style>
         :root { --p: #07c160; --bg: #f6f7f9; --sub: #888; --red: #ff4d4f; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
@@ -11,58 +11,50 @@
         h3 { margin: 0 0 15px 0; font-size: 17px; display: flex; align-items: center; }
         h3::before { content: ""; width: 4px; height: 16px; background: var(--p); border-radius: 2px; margin-right: 8px; }
         
-        input, select, textarea { width: 100%; padding: 12px 15px; margin-bottom: 12px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 14px; background: #fafafa; outline: none; }
-        textarea { height: 100px; resize: none; border-color: #ddd; }
-        
+        textarea, input, select { width: 100%; padding: 12px 15px; margin-bottom: 12px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 14px; background: #fafafa; outline: none; }
+        textarea { height: 100px; resize: none; }
+
         .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 600; color: #fff; margin-bottom: 10px; cursor: pointer; font-size: 16px; }
-        .btn:active { opacity: 0.8; }
         .btn-green { background: var(--p); }
         .btn-orange { background: #ff9500; }
         .btn-blue { background: #007aff; }
-        .btn-ghost { background: #f0f2f5; color: #666; font-size: 14px; margin-top: 5px; }
 
         .member-item { border-bottom: 1px solid #f0f0f0; padding: 15px 0; }
         .m-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .m-info { font-weight: bold; font-size: 16px; color: #000; }
-        .m-attr { font-weight: normal; font-size: 13px; color: #666; margin-left: 4px; }
-        .del-btn { color: var(--red); font-size: 12px; border: 1px solid var(--red); border-radius: 6px; padding: 4px 8px; }
+        .m-info { font-weight: bold; font-size: 16px; }
+        .m-attr { font-weight: normal; font-size: 12px; color: #777; margin-left: 5px; }
+        .del-btn { color: var(--red); font-size: 12px; border: 1px solid var(--red); padding: 3px 8px; border-radius: 6px; }
         
-        .tag { display: inline-block; padding: 8px 10px; background: #f0f2f5; border-radius: 8px; margin: 4px 6px 4px 0; font-size: 12px; color: #555; text-align: center; min-width: 70px; }
+        /* 关键修改：意向按钮样式 */
+        .tag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 10px; }
+        .tag { padding: 8px 4px; background: #f0f2f5; border-radius: 8px; font-size: 12px; color: #444; text-align: center; border: 1px solid transparent; line-height: 1.4; transition: 0.2s; }
+        .tag b { display: block; font-size: 13px; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .tag span { display: block; font-size: 10px; opacity: 0.7; }
         .tag.active { background: #e7f7ed; color: var(--p); border-color: var(--p); font-weight: bold; }
         
-        #saveTip { font-size: 12px; color: var(--p); text-align: center; margin: 10px 0; display: none; }
-        .res-item { background: #f0f9eb; padding: 12px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--p); font-size: 14px; line-height: 1.8; }
+        #saveTip { font-size: 12px; color: var(--p); text-align: center; margin: 5px 0; display: none; }
+        .res-item { background: #f0f9eb; padding: 12px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--p); font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h3>1. 智能导入接龙</h3>
-    <textarea id="importBox" placeholder="直接粘贴微信接龙全文...&#10;例：3. 叹息之墙 骑士 尚未组队 240万战力"></textarea>
-    <button class="btn btn-green" onclick="smartImport()">一键解析并导入</button>
-    <div style="font-size:12px; color:#999; text-align:center;">*系统会自动识别昵称、职业和战力</div>
+    <h3>1. 导入接龙</h3>
+    <textarea id="importBox" placeholder="粘贴微信接龙文本..."></textarea>
+    <button class="btn btn-green" onclick="smartImport()">智能解析并导入</button>
 </div>
 
 <div class="card">
-    <h3>2. 手动补充/生成链接</h3>
-    <input id="un" placeholder="昵称">
-    <select id="uj">
-        <option value="" disabled selected>选择职业</option>
-        <option value="术士">术士</option><option value="骑士">骑士</option>
-        <option value="斗士">斗士</option><option value="贤者">贤者</option>
-    </select>
-    <input id="up" placeholder="战力 (如: 300万)">
-    <button class="btn btn-orange" onclick="addM()">确定录入</button>
-    <button class="btn btn-blue" onclick="make()">复制分享链接给群友</button>
+    <h3>2. 管理与分享</h3>
+    <button class="btn btn-orange" onclick="make()">复制分享链接</button>
+    <div id="saveTip">✓ 数据已同步本地存储</div>
 </div>
-
-<div id="saveTip">✓ 数据已自动保存</div>
 
 <div class="card">
     <h3>3. 勾选意向并计算</h3>
-    <div id="list" style="color:#999; text-align:center; padding:10px 0;">等待数据导入...</div>
-    <button class="btn btn-green" style="margin-top:20px;" onclick="match()">生成匹配结果</button>
-    <button class="btn btn-ghost" onclick="clearAll()">清空全部数据</button>
+    <div id="list" style="color:#999; text-align:center;">等待数据...</div>
+    <button class="btn btn-blue" style="margin-top:20px;" onclick="match()">生成最终匹配结果</button>
+    <button class="btn" style="background:#888;font-size:12px;padding:8px;" onclick="clearAll()">清空数据</button>
 </div>
 
 <div id="res"></div>
@@ -79,51 +71,38 @@
         if(localData) { ms = JSON.parse(localData); render(); }
     }
 
-    // 🚀 核心功能：智能解析微信接龙
     function smartImport() {
         var text = document.getElementById('importBox').value;
-        if(!text.trim()) return alert("请先粘贴内容");
-        
+        if(!text.trim()) return;
         var lines = text.split('\n');
         var count = 0;
         var jobs = ["术士", "骑士", "斗士", "贤者"];
 
         lines.forEach(line => {
-            // 正则逻辑：匹配数字开头，提取昵称，识别职业，提取战力数字
             var row = line.trim();
-            if(!row || !/^\d+\./.test(row)) return; // 必须是数字开头如 "1."
-
-            var cleanRow = row.replace(/^\d+\.\s*/, ''); // 去掉编号
-            var parts = cleanRow.split(/\s+/);
+            if(!/^\d+\./.test(row)) return; 
             
-            if(parts.length >= 2) {
-                var name = parts[0];
-                var job = "未知";
-                var power = "未知";
+            var name = row.replace(/^\d+\.\s*/, '').split(/\s+/)[0];
+            var job = "未知";
+            var power = "未知";
 
-                // 在整行里搜职业
-                jobs.forEach(j => { if(row.indexOf(j) > -1) job = j; });
-                
-                // 搜战力（匹配数字+万）
-                var pMatch = row.match(/\d+(万)?/g);
-                if(pMatch) power = pMatch[pMatch.length-1];
+            jobs.forEach(j => { if(row.indexOf(j) > -1) job = j; });
+            
+            // 改进战力识别：匹配数字后跟“万”或者纯数字
+            var pMatch = row.match(/(\d+万|\d+)/g);
+            if(pMatch) {
+                // 排除前面的序号，取最后一个可能是战力的数字
+                power = pMatch[pMatch.length - 1];
+            }
 
-                // 检查是否重复
-                if(!ms.some(m => m.n === name)) {
-                    ms.push({n: name, j: job, p: power, pre: []});
-                    count++;
-                }
+            if(name && !ms.some(m => m.n === name)) {
+                ms.push({n: name, j: job, p: power, pre: []});
+                count++;
             }
         });
-
-        if(count > 0) {
-            alert("成功识别并导入 " + count + " 位成员！");
-            document.getElementById('importBox').value = "";
-            render();
-            saveToLocal();
-        } else {
-            alert("未识别到有效成员，请确保格式类似：\n1. 名字 职业 战力");
-        }
+        alert("已成功解析并导入 " + count + " 人");
+        document.getElementById('importBox').value = "";
+        render(); saveToLocal();
     }
 
     function saveToLocal() {
@@ -133,28 +112,11 @@
         setTimeout(()=> tip.style.display='none', 2000);
     }
 
-    function clearAll() {
-        if(confirm("确定清空吗？")) { ms=[]; localStorage.removeItem('team_data'); render(); }
-    }
-
-    function addM() {
-        var n=document.getElementById('un').value.trim(), j=document.getElementById('uj').value, p=document.getElementById('up').value.trim();
-        if(!n || !j || !p) return alert("请填全");
-        ms.push({n:n, j:j, p:p, pre:[]});
-        document.getElementById('un').value=""; document.getElementById('uj').selectedIndex=0; document.getElementById('up').value="";
-        render(); saveToLocal();
-    }
-
-    function delM(idx) {
-        var name = ms[idx].n;
-        ms.splice(idx, 1);
-        ms.forEach(m => { var p=m.pre.indexOf(name); if(p>-1) m.pre.splice(p,1); });
-        render(); saveToLocal();
-    }
+    function clearAll() { if(confirm("确定清空？")) { ms=[]; localStorage.removeItem('team_data'); render(); } }
 
     function render() {
         var box = document.getElementById('list');
-        if(ms.length == 0) { box.innerHTML = '等待数据导入...'; return; }
+        if(ms.length == 0) { box.innerHTML = '等待数据...'; return; }
         var h = "";
         ms.forEach((m, i) => {
             h += `<div class="member-item">
@@ -162,16 +124,27 @@
                     <div class="m-info">${m.n}<span class="m-attr">(${m.j} | ${m.p})</span></div>
                     <div class="del-btn" onclick="delM(${i})">删除</div>
                 </div>
-                <div>`;
+                <div class="tag-grid">`;
             ms.forEach((t, k) => {
                 if(i!=k) {
                     var act = m.pre.indexOf(t.n) > -1;
-                    h += `<span class="tag ${act?'active':''}" onclick="sel(${i},'${t.n}')">${t.n}<br><small>${t.j}</small></span>`;
+                    // 这里重点修改：显示名字 + (职业·战力)
+                    h += `<div class="tag ${act?'active':''}" onclick="sel(${i},'${t.n}')">
+                            <b>${t.n}</b>
+                            <span>${t.j} · ${t.p}</span>
+                          </div>`;
                 }
             });
             h += `</div></div>`;
         });
         box.innerHTML = h;
+    }
+
+    function delM(idx) {
+        var name = ms[idx].n;
+        ms.splice(idx, 1);
+        ms.forEach(m => { var p=m.pre.indexOf(name); if(p>-1) m.pre.splice(p,1); });
+        render(); saveToLocal();
     }
 
     function sel(idx, name) {
@@ -185,7 +158,10 @@
 
     function make() {
         var url = window.location.origin + window.location.pathname + "?d=" + encodeURIComponent(JSON.stringify(ms));
-        prompt("请复制下方链接发送给群友进行勾选：", url);
+        var t = document.createElement("textarea");
+        t.value = url; document.body.appendChild(t); t.select();
+        document.execCommand('copy'); document.body.removeChild(t);
+        alert("链接已自动复制，快去发给群友吧！");
     }
 
     function match() {
