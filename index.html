@@ -3,41 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手-下拉增强版</title>
+    <title>组队助手</title>
     <style>
         :root { --p: #07c160; --bg: #f6f7f9; --sub: #888; --red: #ff4d4f; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         h3 { margin: 0 0 15px 0; font-size: 17px; display: flex; align-items: center; }
         h3::before { content: ""; width: 4px; height: 16px; background: var(--p); border-radius: 2px; margin-right: 8px; }
-        
-        /* 输入框和下拉框通用样式 */
         input, select { width: 100%; padding: 12px 15px; margin-bottom: 12px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 15px; background: #fafafa; outline: none; appearance: none; -webkit-appearance: none; }
         input:focus, select:focus { border-color: var(--p); background: #fff; }
-        
-        /* 下拉框特定样式 */
         select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L2 4h8z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; }
-
         .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 600; color: #fff; margin-bottom: 10px; cursor: pointer; font-size: 16px; }
         .btn:active { opacity: 0.8; }
         .btn-green { background: var(--p); }
         .btn-orange { background: #ff9500; }
         .btn-blue { background: #007aff; }
-
-        .member-item { border-bottom: 1px solid #f0f0f0; padding: 15px 0; position: relative; }
-        .member-item:last-child { border: none; }
+        .member-item { border-bottom: 1px solid #f0f0f0; padding: 15px 0; }
         .m-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .m-info { font-weight: bold; font-size: 16px; color: #000; }
         .m-attr { font-weight: normal; font-size: 13px; color: #666; margin-left: 4px; }
         .del-btn { color: var(--red); font-size: 13px; cursor: pointer; padding: 5px 10px; border: 1px solid var(--red); border-radius: 6px; }
-        .m-detail { font-size: 13px; color: var(--sub); margin-bottom: 12px; display: block; margin-top: 4px; }
-        
-        .tag { display: inline-block; padding: 8px 12px; background: #f0f2f5; border-radius: 8px; margin: 4px 6px 4px 0; font-size: 13px; color: #555; border: 1px solid transparent; line-height: 1.4; text-align: center; min-width: 60px; }
+        .m-detail { font-size: 13px; color: var(--sub); margin-bottom: 12px; }
+        .tag { display: inline-block; padding: 8px 12px; background: #f0f2f5; border-radius: 8px; margin: 4px 6px 4px 0; font-size: 13px; color: #555; border: 1px solid transparent; text-align: center; min-width: 60px; }
         .tag.active { background: #e7f7ed; color: var(--p); border-color: var(--p); font-weight: bold; }
-        
         #shareBox { display: none; background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 12px; margin-top: 5px; }
-        #urlOut { width: 100%; word-break: break-all; font-size: 12px; color: #666; background: #fff; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #eee; user-select: all; -webkit-user-select: all; }
+        #urlOut { width: 100%; word-break: break-all; font-size: 12px; color: #666; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #eee; user-select: all; -webkit-user-select: all; }
         .res-item { background: #f0f9eb; padding: 12px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--p); font-size: 14px; line-height: 1.8; }
+        .save-tip { font-size: 12px; color: var(--p); text-align: center; margin-bottom: 10px; display: none; }
     </style>
 </head>
 <body>
@@ -45,7 +37,6 @@
 <div class="card">
     <h3>成员录入</h3>
     <input id="un" placeholder="昵称 (如：笨蛋欧皇)">
-    
     <select id="uj">
         <option value="" disabled selected>请选择职业</option>
         <option value="术士">术士</option>
@@ -53,19 +44,21 @@
         <option value="斗士">斗士</option>
         <option value="贤者">贤者</option>
     </select>
-    
     <input id="up" placeholder="战力 (如：350万)">
     <button class="btn btn-green" onclick="addM()">确定录入</button>
     <button class="btn btn-orange" onclick="make()">生成分享链接</button>
     <div id="shareBox">
-        <div style="font-size:13px; font-weight:bold; color:#856404;">链接已生成！请长按下方文字复制：</div>
+        <div style="font-size:13px; font-weight:bold; color:#856404;">链接已生成！请长按复制发给群友：</div>
         <div id="urlOut"></div>
     </div>
 </div>
 
+<div id="saveTip" class="save-tip">✓ 数据已实时自动保存</div>
+
 <div class="card">
     <h3>勾选意向 (限选3人)</h3>
     <div id="list" style="color:#999; font-size:14px; text-align:center; padding:20px 0;">暂无名单，请录入...</div>
+    <button class="btn" style="background:#888; margin-top:15px; font-size:13px; padding:10px;" onclick="clearAll()">清空当前所有数据</button>
 </div>
 
 <button class="btn btn-blue" onclick="match()">点击生成匹配结果</button>
@@ -74,13 +67,44 @@
 <script>
     var ms = [];
 
+    // 初始化加载
     window.onload = function() {
+        // 优先检查 URL 是否带数据
         var d = new URLSearchParams(window.location.search).get('d');
         if(d) {
             try {
                 ms = JSON.parse(decodeURIComponent(d));
                 render();
-            } catch(e) { console.error("数据加载失败"); }
+                saveToLocal(); // URL数据也存一份本地
+                return;
+            } catch(e) {}
+        }
+        
+        // 其次检查本地存储
+        var localData = localStorage.getItem('team_data');
+        if(localData) {
+            if(confirm("发现上次未完成的录入记录，是否恢复？")) {
+                ms = JSON.parse(localData);
+                render();
+            }
+        }
+    }
+
+    // 保存到本地
+    function saveToLocal() {
+        localStorage.setItem('team_data', JSON.stringify(ms));
+        var tip = document.getElementById('saveTip');
+        tip.style.display = 'block';
+        setTimeout(function(){ tip.style.display = 'none'; }, 2000);
+    }
+
+    // 清空全部数据
+    function clearAll() {
+        if(confirm("确定要清空所有已录入的信息吗？此操作不可撤销。")) {
+            ms = [];
+            localStorage.removeItem('team_data');
+            render();
+            location.href = window.location.origin + window.location.pathname; // 重置URL
         }
     }
 
@@ -88,48 +112,41 @@
         var n = document.getElementById('un').value.trim();
         var j = document.getElementById('uj').value;
         var p = document.getElementById('up').value.trim();
-        if(!n || !j || !p) return alert("请完整填写昵称、选择职业并输入战力");
-        
+        if(!n || !j || !p) return alert("信息不全");
         ms.push({n:n, j:j, p:p, pre:[]});
-        
-        // 重置表单
         document.getElementById('un').value = "";
         document.getElementById('uj').selectedIndex = 0;
         document.getElementById('up').value = "";
         render();
+        saveToLocal();
     }
 
     function delM(idx) {
-        if(confirm("确定要删除 " + ms[idx].n + " 吗？")) {
-            var nameToDelete = ms[idx].n;
+        if(confirm("确定删除 " + ms[idx].n + " ？")) {
+            var name = ms[idx].n;
             ms.splice(idx, 1);
-            for(var i=0; i<ms.length; i++) {
-                var pIdx = ms[i].pre.indexOf(nameToDelete);
-                if(pIdx > -1) ms[i].pre.splice(pIdx, 1);
-            }
+            ms.forEach(function(m){ 
+                var pIdx = m.pre.indexOf(name);
+                if(pIdx > -1) m.pre.splice(pIdx, 1);
+            });
             render();
+            saveToLocal();
         }
     }
 
     function render() {
         var box = document.getElementById('list');
         if(ms.length == 0) { box.innerHTML = '暂无名单，请录入...'; return; }
-        
         var h = "";
         for(var i=0; i<ms.length; i++){
             h += '<div class="member-item">';
-            h += '  <div class="m-header">';
-            h += '    <div class="m-info">' + ms[i].n + '<span class="m-attr">(' + ms[i].j + ' | ' + ms[i].p + ')</span></div>';
-            h += '    <div class="del-btn" onclick="delM('+i+')">删除</div>';
-            h += '  </div>';
-            h += '  <div class="m-detail">请选择意向队友 (已选：'+ms[i].pre.length+'/3)：</div>';
+            h += '  <div class="m-header"><div class="m-info">' + ms[i].n + '<span class="m-attr">(' + ms[i].j + ' | ' + ms[i].p + ')</span></div><div class="del-btn" onclick="delM('+i+')">删除</div></div>';
+            h += '  <div class="m-detail">请选意向 (已选：'+ms[i].pre.length+'/3)：</div>';
             for(var k=0; k<ms.length; k++){
                 if(i != k){
-                    var target = ms[k];
-                    var active = ms[i].pre.indexOf(target.n) > -1;
-                    h += '<span class="tag '+(active?'active':'')+'" onclick="sel('+i+',\''+target.n+'\')">';
-                    h += target.n + '<br><small style="opacity:0.8;font-size:10px;">' + target.j + ' · ' + target.p + '</small>';
-                    h += '</span>';
+                    var t = ms[k];
+                    var act = ms[i].pre.indexOf(t.n) > -1;
+                    h += '<span class="tag '+(act?'active':'')+'" onclick="sel('+i+',\''+t.n+'\')">'+t.n+'<br><small style="opacity:0.8;font-size:10px;">'+t.j+'·'+t.p+'</small></span>';
                 }
             }
             h += '</div>';
@@ -140,12 +157,12 @@
     function sel(idx, name) {
         var m = ms[idx];
         var p = m.pre.indexOf(name);
-        if(p > -1) { m.pre.splice(p, 1); } 
-        else {
-            if(m.pre.length >= 3) return alert("每人最多选3个");
+        if(p > -1) { m.pre.splice(p, 1); } else {
+            if(m.pre.length >= 3) return alert("限选3人");
             m.pre.push(name);
         }
         render();
+        saveToLocal();
     }
 
     function make() {
@@ -159,26 +176,18 @@
     function match() {
         if(ms.length == 0) return;
         var used = {}, ts = [], pool = JSON.parse(JSON.stringify(ms));
-        var dict = {};
-        ms.forEach(function(item){ dict[item.n] = item; });
-
-        function formatInfo(name) {
-            var info = dict[name];
-            return info ? name + '(' + info.j + '，' + info.p + ')' : name;
-        }
-
+        var dict = {}; ms.forEach(function(item){ dict[item.n] = item; });
+        function f(name) { var i = dict[name]; return i ? name + '(' + i.j + '，' + i.p + ')' : name; }
         while(pool.length > 0) {
-            var c = pool.shift(); 
-            if(used[c.n]) continue;
-            var team = [formatInfo(c.n)]; 
-            used[c.n] = true;
+            var c = pool.shift(); if(used[c.n]) continue;
+            var team = [f(c.n)]; used[c.n] = true;
             for(var i=0; i<c.pre.length; i++){
                 var target = c.pre[i];
-                if(!used[target] && team.length < 4){ team.push(formatInfo(target)); used[target] = true; }
+                if(!used[target] && team.length < 4){ team.push(f(target)); used[target] = true; }
             }
             for(var i=0; i<ms.length; i++){
                 var target = ms[i].n;
-                if(!used[target] && team.length < 4){ team.push(formatInfo(target)); used[target] = true; }
+                if(!used[target] && team.length < 4){ team.push(f(target)); used[target] = true; }
             }
             ts.push(team);
         }
