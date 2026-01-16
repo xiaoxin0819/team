@@ -3,55 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>组队助手-全力进位版</title>
+    <title>组队助手-回归稳健版</title>
     <style>
-        :root { --p: #07c160; --bg: #f8f9fa; --card: #ffffff; --text: #444; --blue: #007aff; --red: #ee0a24; --gold: #ffb800; --orange: #ff9500; }
-        body { font-family: "Heiti SC", "STHeiti", "SimHei", "Microsoft YaHei", sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); font-weight: 300; }
-        
-        .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        h3 { margin: 0 0 15px 0; font-size: 15px; font-weight: 400; color: #1a1a1a; display: flex; align-items: center; }
-        h3::before { content: ""; width: 3px; height: 14px; background: var(--p); border-radius: 2px; margin-right: 8px; }
-        
-        textarea, input, select { width: 100%; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; outline: none; box-sizing: border-box; font-size: 13px; margin-bottom: 10px; }
+        :root { 
+            --p: #07c160; 
+            --bg: #f5f7fa; 
+            --card: #ffffff; 
+            --text: #333; 
+            --blue: #007aff; 
+            --red: #ff3b30; 
+            --gold: #FFD700; 
+            --orange: #ff9500; 
+            --darkred: #a52a2a; 
+        }
 
-        .btn { width: 100%; border: none; border-radius: 8px; padding: 12px; font-size: 15px; cursor: pointer; color: #fff; margin-bottom: 10px; display: block; text-align: center; font-weight: 400; }
+        body { 
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: var(--bg); 
+            margin: 0; 
+            padding: 15px; 
+            color: var(--text); 
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .card { 
+            background: var(--card); 
+            border-radius: 14px; 
+            padding: 18px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        }
+
+        h3 { margin: 0 0 15px 0; font-size: 16px; font-weight: 600; color: #000; display: flex; align-items: center; }
+        h3::before { content: ""; width: 4px; height: 16px; background: var(--p); border-radius: 2px; margin-right: 8px; }
+        
+        /* 人名：大号、纯黑、恢复加粗 */
+        .m-name-title { 
+            font-size: 20px; 
+            font-weight: 700; 
+            color: #000 !important; 
+        }
+
+        /* 职业与战力：放大、不加粗 */
+        .job-label, .power-label { 
+            font-size: 15px; 
+            font-weight: 400 !important; 
+        }
+
+        .job-骑士 { color: var(--gold) !important; }
+        .job-术士 { color: var(--blue) !important; }
+        .job-贤者 { color: var(--p) !important; }
+        .job-斗士 { color: var(--darkred) !important; }
+        .highlight-red { color: var(--red) !important; }
+
+        textarea, input, select { 
+            width: 100%; padding: 12px; border: 1px solid #efefef; 
+            border-radius: 8px; background: #fafafa; outline: none; 
+            box-sizing: border-box; font-size: 15px; margin-bottom: 10px; 
+        }
+
+        .btn { 
+            width: 100%; border: none; border-radius: 10px; padding: 14px; 
+            font-size: 16px; font-weight: 600; cursor: pointer; color: #fff; 
+            margin-bottom: 10px; display: block; text-align: center;
+        }
         .btn-green { background: var(--p); }
         .btn-blue { background: var(--blue); }
         .btn-red { background: var(--red); }
         .btn-orange { background: var(--orange); }
-        .btn-group { display: flex; gap: 10px; }
-        .btn-half { flex: 1; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
+        .modal-content { background: #fff; width: 85%; padding: 25px; border-radius: 15px; }
+        
+        .tag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .tag-box { border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px 5px; text-align: center; background: #fff; }
+        .tag-box.active { border-color: var(--p); background: #f0f9f4; box-shadow: 0 0 0 2px var(--p); }
+        
+        /* 待匹配意向页人名：同步加粗 */
+        .tag-name { display: block; font-size: 18px; color: #000; font-weight: 700; margin-bottom: 2px; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #fff; width: 85%; padding: 25px 20px; border-radius: 15px; text-align: center; }
-        
-        /* 保持你的大字体样式 */
-        .member-block { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .m-header-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .m-name-title { font-size: 18px; font-weight: bold; color: #000; }
-        .m-info-right { font-size: 13px; }
-        .btn-del-text { color: var(--red); border: 1px solid #ffccd3; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 10px; background: #fff5f6; }
-        
-        .tag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .tag-box { border: 1px solid #eee; border-radius: 6px; padding: 12px 5px; text-align: center; background: #fff; }
-        .tag-box.active { border-color: var(--p); background: #f0f9f4; }
-        .tag-box .t-name { display: block; font-weight: bold; font-size: 16px; color: #000; margin-bottom: 4px; }
-        .tag-box .t-sub { font-size: 12px; display: block; }
-        
-        .res-item { padding: 15px; border-radius: 12px; margin-top: 12px; font-size: 14px; line-height: 1.6; }
-        .type-fixed { background: #f0f7ff; border-left: 5px solid #2f88ff; }
-        .type-match { background: #f6fbf8; border-left: 5px solid #07c160; }
-        .res-title { font-weight: bold; font-size: 15px; color: #333; margin-bottom: 5px; display: block; }
+        .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .res-person { background: #fff; padding: 12px 4px; border-radius: 8px; border: 1px solid #eee; text-align: center; }
+        /* 结果页人名：同步加粗 */
+        .res-person b { font-size: 19px; color: #000; font-weight: 700; display: block; margin-bottom: 4px; }
+        .res-person span { font-size: 14px; font-weight: 400 !important; }
     </style>
 </head>
 <body>
 
-<div id="parseModal" class="modal">
+<div id="shareModal" class="modal">
     <div class="modal-content">
-        <h3 style="justify-content:center; color:var(--p);">识别成功</h3>
-        <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
-        <div id="parseSummary" style="text-align:left; line-height:2.2; font-size:15px;"></div>
-        <button class="btn btn-green" style="margin-top:20px;" onclick="document.getElementById('parseModal').style.display='none'">确认并继续</button>
+        <h3 style="justify-content:center; color:var(--blue);">分享链接</h3>
+        <div id="shareLinkArea" style="width: 100%; height: 80px; font-size: 12px; word-break: break-all; border: 1px solid #eee; padding: 8px; border-radius: 8px; background: #f9f9f9; margin-bottom: 15px; overflow-y: scroll; text-align: left;"></div>
+        <button class="btn btn-blue" onclick="copyShareLink()">点击复制链接</button>
+        <button class="btn btn-red" style="margin-top:10px" onclick="document.getElementById('shareModal').style.display='none'">关闭</button>
     </div>
 </div>
 
@@ -59,39 +104,30 @@
     <h3>1. 录入数据</h3>
     <textarea id="importBox" placeholder="在此粘贴接龙文本..."></textarea>
     <button class="btn btn-green" onclick="smartImport()">智能解析接龙</button>
-    
-    <div style="background:#fdfdfd; border:1px dashed #ddd; padding:12px; border-radius:10px;">
+    <div style="background:#fcfcfc; border:1px dashed #ccc; padding:15px; border-radius:10px; margin-top:10px;">
         <input type="text" id="m_name" placeholder="昵称">
         <select id="m_job">
             <option value="术士">术士</option><option value="贤者">贤者</option><option value="骑士">骑士</option><option value="斗士">斗士</option>
         </select>
         <input type="number" id="m_power" placeholder="战力数值">
-        <button class="btn btn-orange" style="margin:0; padding:8px;" onclick="addManual()">确认加入名单</button>
+        <button class="btn btn-orange" style="margin-bottom:0" onclick="addManual()">确认加入名单</button>
     </div>
-
-    <div class="btn-group" style="margin-top:15px;">
-        <button class="btn btn-blue btn-half" onclick="openShare()">分享页面</button>
-        <button class="btn btn-red btn-half" onclick="clearAll()">重置数据</button>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+        <button class="btn btn-blue" style="flex:1" onclick="openShare()">分享页面</button>
+        <button class="btn btn-red" style="flex:1" onclick="clearAll()">重置数据</button>
     </div>
 </div>
 
-<div class="card">
-    <h3>2. 待匹配意向</h3>
-    <div id="list"></div>
-</div>
-
-<button class="btn btn-blue" style="font-size: 17px; padding: 18px; border-radius:15px; font-weight:bold;" onclick="match()">生成方案 (强强进位填补)</button>
+<div class="card"><h3>2. 待匹配意向</h3><div id="list"></div></div>
+<button class="btn btn-blue" style="font-size: 18px; padding: 18px; font-weight:600; border-radius:12px;" onclick="match()">生成方案 (强强进位填补)</button>
 <div id="res"></div>
 
 <script>
     let ms = [], fixedTs = [], unit = "万";
-    const JOBS = ["术士", "骑士", "斗士", "贤者"];
+    const JOBS = ["术士", "贤者", "骑士", "斗士"];
     const STATUS = ["未组队", "尚未", "待组", "缺", "差", "补"];
 
-    // 编解码
-    function safeB64(str) {
-        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m, p) => String.fromCharCode('0x' + p)));
-    }
+    function safeB64(str) { return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m, p) => String.fromCharCode('0x' + p))); }
 
     window.onload = function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -100,13 +136,27 @@
             try {
                 const dec = decodeURIComponent(Array.prototype.map.call(atob(d), (c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
                 const json = JSON.parse(dec);
-                ms = json.ms; fixedTs = json.fs; unit = json.u; render(); return;
+                ms = json.ms || json.m || [];
+                fixedTs = json.fs || json.f || [];
+                unit = json.u || "万";
+                render(); return;
             } catch(e) {}
         }
         ms = JSON.parse(localStorage.getItem('tm_ms') || '[]');
         fixedTs = JSON.parse(localStorage.getItem('tm_fs') || '[]');
         unit = localStorage.getItem('tm_u') || '万';
         render();
+    }
+
+    function openShare() {
+        const data = safeB64(JSON.stringify({ms, fs:fixedTs, u:unit}));
+        document.getElementById('shareLinkArea').innerText = window.location.origin + window.location.pathname + "?d=" + data;
+        document.getElementById('shareModal').style.display = 'flex';
+    }
+
+    function copyShareLink() {
+        const link = document.getElementById('shareLinkArea').innerText;
+        navigator.clipboard.writeText(link).then(() => alert("复制成功！")).catch(() => alert("请手动复制"));
     }
 
     function smartImport() {
@@ -121,7 +171,13 @@
             const blocks = row.replace(/^\d+\.\s*/, '').split(/\s+/).filter(b => b.length > 0);
             if (!STATUS.some(s => row.includes(s)) && blocks.length >= 4) {
                 const names = blocks.slice(0, 4);
-                tF.push(names.join(' 、 '));
+                let teamMembers = names.map(n => {
+                    let job = "未知";
+                    if(row.includes("术士")) job="术士"; else if(row.includes("贤者")) job="贤者";
+                    else if(row.includes("骑士")) job="骑士"; else if(row.includes("斗士")) job="斗士";
+                    return { n, j: job };
+                });
+                tF.push(teamMembers);
                 names.forEach(n => allF.add(n));
             } else if (blocks.length > 0) {
                 const name = blocks[0];
@@ -136,13 +192,6 @@
         });
         ms = tM.filter(m => !allF.has(m.n)); fixedTs = tF;
         save(); render();
-        document.getElementById('parseSummary').innerHTML = `
-            ♦ 固定组 (已成)： <span style="color:var(--blue); font-weight:bold;">${fixedTs.length}</span> 组<br>
-            ♦ 待匹配人员： <span style="color:var(--p); font-weight:bold;">${ms.length}</span> 名<br>
-            ♦ 战力单位： <span style="color:var(--red); font-weight:bold;">${unit}</span>
-        `;
-        document.getElementById('parseModal').style.display = 'flex';
-        document.getElementById('importBox').value = "";
     }
 
     function addManual() {
@@ -152,32 +201,24 @@
         if(!name || isNaN(power)) return;
         ms.push({ n: name, j: job, p: power, pre: [] });
         save(); render();
-        document.getElementById('m_name').value = ""; document.getElementById('m_power').value = "";
     }
-
-    function removeOne(idx) { ms.splice(idx, 1); save(); render(); }
 
     function render() {
         const box = document.getElementById('list');
-        if(!ms.length) { box.innerHTML = '<div style="text-align:center;color:#bbb;padding:20px;">等待录入数据...</div>'; return; }
         box.innerHTML = ms.map((m, i) => `
-            <div class="member-block">
-                <div class="m-header-line">
+            <div style="margin-bottom:20px; border-bottom:1px solid #f0f0f0; padding-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <span class="m-name-title">${m.n}</span>
-                    <div class="m-info-right">
-                        <span style="color:var(--gold); font-weight:bold;">${m.j}</span> | 
-                        <span style="color:var(--red);">${m.p}${unit}</span>
-                        <span class="btn-del-text" onclick="removeOne(${i})">移除</span>
+                    <div class="job-label">
+                        <span class="job-${m.j}">${m.j}</span> | <span class="highlight-red power-label">${m.p}${unit}</span>
+                        <span style="color:#ff3b30; margin-left:12px; font-size:13px; cursor:pointer;" onclick="ms.splice(${i},1);save();render();">[移除]</span>
                     </div>
                 </div>
                 <div class="tag-grid">
                     ${ms.map((t, k) => i===k ? '' : `
                         <div class="tag-box ${m.pre.includes(t.n)?'active':''}" onclick="sel(${i},'${t.n}')">
-                            <span class="t-name">${t.n}</span>
-                            <span class="t-sub">
-                                <span style="color:var(--red)">${t.p}${unit}</span> 
-                                <span style="color:var(--gold); font-weight:bold;">${t.j}</span>
-                            </span>
+                            <span class="tag-name">${t.n}</span>
+                            <span class="job-label"><span class="highlight-red power-label">${t.p}${unit}</span> <span class="job-${t.j}">${t.j}</span></span>
                         </div>`).join('')}
                 </div>
             </div>`).join('');
@@ -186,7 +227,7 @@
     function sel(idx, name) {
         const m = ms[idx], p = m.pre.indexOf(name);
         if(p > -1) m.pre.splice(p, 1);
-        else { if(m.pre.length >= 3) return; m.pre.push(name); }
+        else if(m.pre.length < 3) m.pre.push(name);
         save(); render();
     }
 
@@ -196,66 +237,63 @@
         localStorage.setItem('tm_u', unit);
     }
 
-    function openShare() {
-        const data = safeB64(JSON.stringify({ms, fs:fixedTs, u:unit}));
-        window.prompt("分享链接：", window.location.origin + window.location.pathname + "?d=" + data);
-    }
+    function clearAll() { if(confirm("确定清空吗？")) { localStorage.clear(); location.reload(); } }
 
-    function clearAll() { if(confirm("重置吗？")) { localStorage.clear(); location.reload(); } }
-
-    // --- 修改算法：强强进位填补 + 同职业上限2人 ---
     function match() {
-        let used = new Set(), intentResults = [], strongResults = [];
+        let used = new Set(), results = [];
         let pool = [...ms].sort((a,b) => b.p - a.p);
-
         const getJobCount = (team, job) => team.filter(m => m.j === job).length;
 
-        // 1. 意向组处理
         pool.forEach(m => {
             if (used.has(m.n)) return;
             if (m.pre.length > 0) {
                 let team = [m]; used.add(m.n);
-                m.pre.forEach(favName => {
-                    if (team.length < 4 && !used.has(favName)) {
-                        let f = pool.find(p => p.n === favName);
-                        // 如果勾选的人不违反上限规则，优先拉入
-                        if (f && getJobCount(team, f.j) < 2) { team.push(f); used.add(f.n); }
+                m.pre.forEach(fn => {
+                    if (team.length < 4 && !used.has(fn)) {
+                        let f = pool.find(p => p.n === fn);
+                        if (f && getJobCount(team, f.j) < 2) { team.push(f); used.add(fn); }
                     }
                 });
                 while (team.length < 4) {
-                    let left = pool.filter(p => !used.has(p.n));
+                    let left = pool.filter(p => !used.has(p.n)).sort((a,b) => b.p - a.p);
                     if (left.length === 0) break;
-                    // 战力高者进位，同时检查职业上限
-                    left.sort((a,b) => b.p - a.p);
-                    let partner = left.find(p => getJobCount(team, p.j) < 2);
-                    if(!partner) partner = left[0]; // 兜底
-                    team.push(partner); used.add(partner.n);
+                    let p = left.find(x => getJobCount(team, x.j) < 2) || left[0];
+                    team.push(p); used.add(p.n);
                 }
-                intentResults.push(team);
+                results.push(team);
             }
         });
-
-        // 2. 剩余强强组处理
         while (true) {
             let left = pool.filter(p => !used.has(p.n));
             if (left.length === 0) break;
             let team = [];
-            let leader = left[0];
-            team.push(leader); used.add(leader.n);
-            while(team.length < 4) {
+            while(team.length < 4 && pool.filter(p => !used.has(p.n)).length > 0) {
                 let nextLeft = pool.filter(p => !used.has(p.n));
-                if (nextLeft.length === 0) break;
-                let partner = nextLeft.find(p => getJobCount(team, p.j) < 2);
-                if(!partner) partner = nextLeft[0];
+                let partner = nextLeft.find(p => getJobCount(team, p.j) < 2) || nextLeft[0];
                 team.push(partner); used.add(partner.n);
             }
-            strongResults.push(team);
+            results.push(team);
         }
 
-        let h = `<h3 style="margin-top:20px;">匹配方案结果</h3>`;
-        fixedTs.forEach((t, i) => h += `<div class="res-item type-fixed"><span class="res-title">已成组 ${i+1}</span>${t}</div>`);
-        intentResults.forEach((t, i) => h += `<div class="res-item type-match" style="border-left-color: var(--orange);"><span class="res-title">意向组 ${i+1}</span>${t.map(m => `<b>${m.n}</b>(<span style="color:var(--red)">${m.p}${unit}</span> ${m.j})`).join(' 、 ')}</div>`);
-        strongResults.forEach((t, i) => h += `<div class="res-item type-match"><span class="res-title">强强组 ${i+1}</span>${t.map(m => `<b>${m.n}</b>(<span style="color:var(--red)">${m.p}${unit}</span> ${m.j})`).join(' 、 ')}</div>`);
+        let h = `<h3>匹配方案结果</h3>`;
+        fixedTs.forEach((team, i) => {
+            h += `<div class="card" style="background:#f0f7ff; border-left:5px solid var(--blue);"><b>已成组 ${i+1}</b><div class="res-grid">`;
+            if (Array.isArray(team) && typeof team[0] === 'object') {
+                team.forEach(m => { h += `<div class="res-person"><b>${m.n}</b><span><span class="job-${m.j}">${m.j}</span></span></div>`; });
+            } else {
+                let names = (typeof team === 'string' ? team.split(' 、 ') : team);
+                names.forEach(n => { h += `<div class="res-person"><b>${n}</b><span>已锁定</span></div>`; });
+            }
+            h += `</div></div>`;
+        });
+
+        results.forEach((t, i) => {
+            h += `<div class="card" style="background:#f6fbf8; border-left:5px solid var(--p);"><b>匹配组 ${i+1}</b><div class="res-grid">`;
+            t.forEach(m => {
+                h += `<div class="res-person"><b>${m.n}</b><span><span class="highlight-red">${m.p}${unit}</span> <span class="job-${m.j}">${m.j}</span></span></div>`;
+            });
+            h += `</div></div>`;
+        });
         document.getElementById('res').innerHTML = h;
         document.getElementById('res').scrollIntoView();
     }
