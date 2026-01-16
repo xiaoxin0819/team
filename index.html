@@ -1,118 +1,132 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-    <title>微信组队助手</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+    <title>组队助手-正式版</title>
+    <script>
+        var ms = [];
+        
+        // 1. 录入成员
+        function addMember() {
+            var n = document.getElementById('un').value.trim();
+            var j = document.getElementById('uj').value.trim();
+            var p = document.getElementById('up').value.trim();
+            if (!n || !j || !p) { alert("请填全信息"); return; }
+            ms.push({ n: n, j: j, p: p, pre: [] });
+            document.getElementById('un').value = '';
+            render();
+        }
+
+        // 2. 渲染列表
+        function render() {
+            var html = '';
+            for (var i = 0; i < ms.length; i++) {
+                var m = ms[i];
+                html += '<div style="border:1px solid #ddd;padding:10px;margin-bottom:10px;border-radius:8px;background:#fff;">';
+                html += '<b>' + m.n + '</b> (' + m.j + ' | ' + m.p + ')<br>';
+                html += '<small style="color:#666">限选3人，已选: ' + m.pre.length + '</small><br>';
+                for (var k = 0; k < ms.length; k++) {
+                    if (ms[k].n !== m.n) {
+                        var active = m.pre.indexOf(ms[k].n) > -1;
+                        html += '<button onclick="toggleSelect(' + i + ',\'' + ms[k].n + '\')" style="margin:4px;padding:8px;border-radius:4px;border:1px solid #ccc;background:' + (active ? '#07c160' : '#eee') + ';color:' + (active ? '#fff' : '#333') + '">' + ms[k].n + '</button>';
+                    }
+                }
+                html += '</div>';
+            }
+            document.getElementById('list').innerHTML = html || '暂无成员';
+        }
+
+        function toggleSelect(idx, name) {
+            var m = ms[idx];
+            var pos = m.pre.indexOf(name);
+            if (pos > -1) { m.pre.splice(pos, 1); } 
+            else {
+                if (m.pre.length >= 3) { alert("每人最多选3个"); return; }
+                m.pre.push(name);
+            }
+            render();
+        }
+
+        // 3. 核心修复：分享链接
+        function copyLink() {
+            if (ms.length === 0) { alert("列表里没人，请先录入"); return; }
+            var d = encodeURIComponent(JSON.stringify(ms));
+            // 构造完整的网址
+            var fullUrl = window.location.origin + window.location.pathname + '?d=' + d;
+
+            // 尝试自动复制
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(fullUrl).then(function() {
+                    alert("链接已复制到剪贴板，去微信粘贴即可！");
+                }).catch(function() {
+                    fallbackCopy(fullUrl);
+                });
+            } else {
+                fallbackCopy(fullUrl);
+            }
+        }
+
+        // 备用复制方案（弹窗手动复制）
+        function fallbackCopy(text) {
+            var promptMsg = "自动复制失败，请长按下方全选链接并复制：";
+            window.prompt(promptMsg, text);
+        }
+
+        // 4. 生成匹配结果
+        function match() {
+            if (ms.length === 0) return;
+            var used = {}, teams = [], pool = JSON.parse(JSON.stringify(ms));
+            while (pool.length > 0) {
+                var c = pool.shift(); if (used[c.n]) continue;
+                var team = [c.n + '(' + c.j + ')']; used[c.n] = true;
+                for (var i = 0; i < c.pre.length; i++) {
+                    if (!used[c.pre[i]] && team.length < 4) { team.push(c.pre[i]); used[c.pre[i]] = true; }
+                }
+                for (var i = 0; i < ms.length; i++) {
+                    if (!used[ms[i].n] && team.length < 4) { team.push(ms[i].n); used[ms[i].n] = true; }
+                }
+                teams.push(team);
+            }
+            var resHtml = '';
+            for (var i = 0; i < teams.length; i++) {
+                resHtml += '<div style="background:#e8f5e9;padding:12px;margin-top:10px;border-radius:8px;border-left:5px solid #07c160;"><b>第' + (i + 1) + '组：</b>' + teams[i].join('、') + '</div>';
+            }
+            document.getElementById('res').innerHTML = resHtml;
+        }
+
+        window.onload = function() {
+            var p = new URLSearchParams(window.location.search);
+            var d = p.get('d');
+            if (d) { 
+                try {
+                    ms = JSON.parse(decodeURIComponent(d)); 
+                    render(); 
+                } catch(e) { alert("链接无效或数据损坏"); }
+            }
+        }
+    </script>
     <style>
-        :root { --p: #07c160; --bg: #f7f7f7; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 15px; -webkit-tap-highlight-color:transparent; }
-        .card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #eee; border-radius: 8px; box-sizing: border-box; font-size: 16px; display: block; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; color: #fff; margin-bottom: 10px; font-size: 16px; cursor: pointer; display: block; }
-        .btn-green { background: var(--p); }
-        .btn-orange { background: #fa9d3b; }
-        .member { background: #fff; border: 1px solid #eee; padding: 12px; border-radius: 10px; margin-bottom: 10px; }
-        .tag { display: inline-block; padding: 8px 12px; background: #f2f2f2; border-radius: 6px; margin: 5px 5px 0 0; font-size: 14px; }
-        .tag.active { background: var(--p); color: #fff; }
-        .res-box { background: #fff; border-left: 4px solid var(--p); padding: 10px; margin-top: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        body { font-family: -apple-system, sans-serif; background: #f0f0f4; padding: 15px; margin:0; }
+        .card { background:#fff; padding:15px; border-radius:12px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size:16px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; color: #fff; font-weight: bold; margin-bottom: 10px; font-size:16px; cursor:pointer; }
     </style>
 </head>
 <body>
-    <div class="card" id="adm">
-        <h3 style="margin-top:0">1. 成员录入</h3>
-        <input id="un" type="text" placeholder="输入昵称">
-        <input id="uj" type="text" placeholder="输入职业">
-        <input id="up" type="text" placeholder="输入战力">
-        <button class="btn btn-green" onclick="addMember()">确定录入</button>
-        <button class="btn btn-orange" onclick="copyShareLink()">生成分享链接并复制</button>
+    <div class="card">
+        <h3 style="margin-top:0; color:#333;">1. 成员录入</h3>
+        <input id="un" placeholder="昵称 (如: 战神xx)">
+        <input id="uj" placeholder="职业 (如: 术士)">
+        <input id="up" placeholder="战力 (如: 300w)">
+        <button class="btn" style="background:#07c160" onclick="addMember()">确定录入</button>
+        <button class="btn" style="background:#fa9d3b" onclick="copyLink()">复制分享链接</button>
     </div>
     <div class="card">
-        <h3 style="margin-top:0">2. 勾选意向 (限选3人)</h3>
-        <div id="list"></div>
+        <h3 style="margin-top:0; color:#333;">2. 勾选意向队友</h3>
+        <div id="list">正在加载名单...</div>
     </div>
-    <button class="btn" style="background:#10aeff;" onclick="startMatch()">点击生成匹配结果</button>
-    <div id="result"></div>
-
-<script>
-    let ms = [];
-    const MAX = 3;
-
-    window.onload = function() {
-        const p = new URLSearchParams(window.location.search);
-        const d = p.get('d');
-        if (d) {
-            try {
-                ms = JSON.parse(decodeURIComponent(d));
-                render();
-            } catch(e) { console.error(e); }
-        }
-    };
-
-    function addMember() {
-        const n = document.getElementById('un').value.trim();
-        const j = document.getElementById('uj').value.trim();
-        const p = document.getElementById('up').value.trim();
-        if (!n || !j || !p) { alert("请填全信息"); return; }
-        if (ms.some(m => m.n === n)) { alert("昵称重复"); return; }
-        ms.push({ n, j, p, pre: [] });
-        render();
-        document.getElementById('un').value = '';
-    }
-
-    function render() {
-        const container = document.getElementById('list');
-        if (ms.length === 0) {
-            container.innerHTML = '<p style="color:#999;text-align:center;">暂无成员</p>';
-            return;
-        }
-        container.innerHTML = ms.map((m, i) => `
-            <div class="member">
-                <b>${m.n}</b> (${m.j} | ${m.p})<br>
-                <small style="color:red">已选: ${m.pre.length}/${MAX}</small><br>
-                ${ms.map(o => o.n == m.n ? '' : `<span class="tag ${m.pre.includes(o.n) ? 'active' : ''}" onclick="toggleSelect(${i},'${o.n}')">${o.n}</span>`).join('')}
-            </div>
-        `).join('');
-    }
-
-    function toggleSelect(i, t) {
-        let m = ms[i];
-        if (m.pre.includes(t)) {
-            m.pre = m.pre.filter(x => x !== t);
-        } else {
-            if (m.pre.length >= MAX) { alert("最多选3个"); return; }
-            m.pre.push(t);
-        }
-        render();
-    }
-
-    function copyShareLink() {
-        if(ms.length === 0) { alert("没数据"); return; }
-        const d = encodeURIComponent(JSON.stringify(ms));
-        const url = window.location.origin + window.location.pathname + '?d=' + d;
-        const t = document.createElement('textarea');
-        t.value = url;
-        document.body.appendChild(t);
-        t.select();
-        document.execCommand('copy');
-        document.body.removeChild(t);
-        alert("链接已复制，去微信群发送");
-    }
-
-    function startMatch() {
-        if(ms.length === 0) return;
-        let used = new Set(), teams = [], pool = JSON.parse(JSON.stringify(ms));
-        while (pool.length > 0) {
-            let c = pool.shift(); 
-            if (used.has(c.n)) continue;
-            let team = [c.n + '(' + c.j + ')']; 
-            used.add(c.n);
-            for (let n of c.pre) if (!used.has(n) && team.length < 4) { team.push(n); used.add(n); }
-            for (let x of ms) if (!used.has(x.n) && team.length < 4) { team.push(x.n); used.add(x.n); }
-            teams.push(team);
-        }
-        document.getElementById('result').innerHTML = teams.map((t, i) => `<div class="res-box"><b>组${i + 1}：</b>${t.join('、')}</div>`).join('');
-    }
-</script>
+    <button class="btn" style="background:#10aeff" onclick="match()">点击生成匹配结果</button>
+    <div id="res"></div>
 </body>
 </html>
